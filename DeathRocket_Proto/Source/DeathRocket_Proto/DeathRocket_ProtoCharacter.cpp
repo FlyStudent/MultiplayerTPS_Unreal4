@@ -9,11 +9,16 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "Rocket.h"
+
 //////////////////////////////////////////////////////////////////////////
 // ADeathRocket_ProtoCharacter
 
 ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -22,15 +27,16 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	BaseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	bUseControllerRotationPitch = true;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = true;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
-	GetCharacterMovement()->JumpZVelocity = 600.f;
-	GetCharacterMovement()->AirControl = 0.2f;
+	GetCharacterMovement()->GravityScale = 2.5f;
+	GetCharacterMovement()->JumpZVelocity = 1300.f;
+	GetCharacterMovement()->AirControl = 0.3f;
+	GetCharacterMovement()->FallingLateralFriction = 0.5f;
 
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -57,6 +63,8 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
 
@@ -67,35 +75,15 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADeathRocket_ProtoCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADeathRocket_ProtoCharacter::LookUpAtRate);
-
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &ADeathRocket_ProtoCharacter::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &ADeathRocket_ProtoCharacter::TouchStopped);
-
-	// VR headset functionality
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ADeathRocket_ProtoCharacter::OnResetVR);
 }
 
-
-void ADeathRocket_ProtoCharacter::OnResetVR()
+void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 {
-	// If DeathRocket_Proto is added to a project via 'Add Feature' in the Unreal Editor the dependency on HeadMountedDisplay in DeathRocket_Proto.Build.cs is not automatically propagated
-	// and a linker error will result.
-	// You will need to either:
-	//		Add "HeadMountedDisplay" to [YourProject].Build.cs PublicDependencyModuleNames in order to build successfully (appropriate if supporting VR).
-	// or:
-	//		Comment or delete the call to ResetOrientationAndPosition below (appropriate if not supporting VR)
-	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
-}
+	Super::Tick(DeltaTime);
 
-void ADeathRocket_ProtoCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		Jump();
-}
+	FRotator rotation = GetControlRotation();
 
-void ADeathRocket_ProtoCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-		StopJumping();
+	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -137,4 +125,12 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ADeathRocket_ProtoCharacter::Fire()
+{
+	FActorSpawnParameters spawnParams;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	FVector location = GetActorLocation() + GetActorForwardVector() * 80.f + GetActorRightVector() * 20.f + GetActorUpVector() * 50.f;
+	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
 }
