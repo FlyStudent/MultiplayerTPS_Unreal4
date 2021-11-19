@@ -42,7 +42,25 @@ protected:
 
 	void Fire();
 
+	int   shoulder = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	float cameraYOffset = 30.f;
+	// Aim Down Sight (when aiming)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	float ads = 50.f;
+	// BASIC Field of view (when not aiming)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	float fov = 90.f;
+
+	float curFov;
+
+	void changeCamSide();
+	void Aim();
+	void StopAiming();
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual void BeginPlay() override;
 
 public:
 

@@ -33,13 +33,10 @@ ARocket::ARocket()
 void ARocket::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
 void ARocket::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
-

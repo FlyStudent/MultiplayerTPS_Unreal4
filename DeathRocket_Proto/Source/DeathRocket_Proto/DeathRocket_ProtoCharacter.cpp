@@ -53,6 +53,13 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 }
 
+void ADeathRocket_ProtoCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	curFov = fov;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -63,7 +70,11 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction("ChangeCamSide", IE_Pressed, this, &ADeathRocket_ProtoCharacter::changeCamSide);
+
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
@@ -82,8 +93,13 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FRotator rotation = GetControlRotation();
-
 	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
+
+	FVector actualCamLoc = FollowCamera->GetRelativeLocation();
+	FVector newSide = FMath::VInterpTo(actualCamLoc, { actualCamLoc.X, cameraYOffset * shoulder, actualCamLoc.Z }, DeltaTime, 10.f);
+	FollowCamera->SetRelativeLocation(newSide);
+
+	FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -114,12 +130,12 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
-	if ( (Controller != nullptr) && (Value != 0.0f) )
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
+
 		// get right vector 
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 		// add movement in that direction
@@ -131,6 +147,22 @@ void ADeathRocket_ProtoCharacter::Fire()
 {
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	FVector location = GetActorLocation() + GetActorForwardVector() * 80.f + GetActorRightVector() * 20.f + GetActorUpVector() * 50.f;
+	FVector camLoc = FollowCamera->GetRelativeLocation();
+	FVector location = GetActorLocation() + GetActorForwardVector() * 80.f + GetActorRightVector() * camLoc.Y + GetActorUpVector() * camLoc.Z;
 	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
+}
+
+void ADeathRocket_ProtoCharacter::changeCamSide()
+{
+	shoulder *= -1;
+}
+
+void ADeathRocket_ProtoCharacter::Aim()
+{
+	curFov = ads;
+}
+
+void ADeathRocket_ProtoCharacter::StopAiming()
+{
+	curFov = fov;
 }
