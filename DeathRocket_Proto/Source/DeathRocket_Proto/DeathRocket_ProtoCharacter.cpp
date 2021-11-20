@@ -34,6 +34,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// Configure character movement
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->GravityScale = 2.5f;
+	GetCharacterMovement()->MaxAcceleration = 10000.f;
 	GetCharacterMovement()->JumpZVelocity = 1300.f;
 	GetCharacterMovement()->AirControl = 0.3f;
 	GetCharacterMovement()->FallingLateralFriction = 0.5f;
@@ -58,6 +59,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	curFov = fov;
+	curEndurance = enduranceMax;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,6 +77,9 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Sprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADeathRocket_ProtoCharacter::StopSprint);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
@@ -100,6 +105,26 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	FollowCamera->SetRelativeLocation(newSide);
 
 	FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
+
+	if (sprinting)
+	{
+		if (curSprintTime <= sprintMaxTime)
+			GetCharacterMovement()->MaxWalkSpeed = sprintingSpeed;
+		else
+			GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
+
+		curSprintTime += DeltaTime;
+		curEndurance -= consumptionSeconds * DeltaTime;
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curEndurance));
+
+		if (curEndurance <= 0.f)
+			StopSprint();
+	}
+	else
+	{
+		curEndurance = FMath::Min(curEndurance + recuperationSeconds * DeltaTime, enduranceMax);
+	}
+
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -165,4 +190,16 @@ void ADeathRocket_ProtoCharacter::Aim()
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
 	curFov = fov;
+}
+
+void ADeathRocket_ProtoCharacter::Sprint()
+{
+	sprinting = true;
+}
+
+void ADeathRocket_ProtoCharacter::StopSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = walkingSpeed;
+	curSprintTime = 0.f;
+	sprinting = false;
 }
