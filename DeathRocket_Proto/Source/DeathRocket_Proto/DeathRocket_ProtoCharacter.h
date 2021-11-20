@@ -46,6 +46,7 @@ protected:
 
 	void Fire();
 
+	// CAMERA
 	int   shoulder = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float cameraYOffset = 30.f;
@@ -55,12 +56,37 @@ protected:
 	// BASIC Field of view (when not aiming)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float fov = 90.f;
-
 	float curFov;
+
+	// SPRINT
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float walkingSpeed = 600.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float runningSpeed = 1000.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float sprintingSpeed = 3000.f;
+
+	bool sprinting = false;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float sprintMaxTime = 0.2f;
+	float curSprintTime = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float enduranceMax = 100.f;
+	float curEndurance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float consumptionSeconds = 40.f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float recuperationSeconds = 30.f;
+	// METHODS
 
 	void changeCamSide();
 	void Aim();
 	void StopAiming();
+
+	void Sprint();
+	void StopSprint();
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

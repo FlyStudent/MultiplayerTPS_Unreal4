@@ -10,7 +10,6 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "Rocket.h"
-#include "Timer.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ADeathRocket_ProtoCharacter
@@ -18,6 +17,7 @@
 ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
 
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -34,7 +34,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// Configure character movement
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->GravityScale = 2.5f;
-	GetCharacterMovement()->MaxAcceleration = 100000.f;
+	GetCharacterMovement()->MaxAcceleration = 10000.f;
 	GetCharacterMovement()->JumpZVelocity = 1300.f;
 	GetCharacterMovement()->AirControl = 0.3f;
 	GetCharacterMovement()->FallingLateralFriction = 0.5f;
@@ -56,30 +56,14 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
-
-	// Setting values
-	curStamina = maxStamina;
-	curHealth = healthMax;
-	curAmmo = ammoMax;
-}
-
-ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
-{
-	delete fireTimer;
-	delete reloadTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	fireTimer = new Timer(GetWorld(), fireRate);
-	reloadTimer = new Timer(GetWorld(), reloadTime);
-	dashRecoveryTimer = new Timer(GetWorld(), dashRecoveryTime);
-
-	// Setting values
-	fov = FollowCamera->FieldOfView;
 	curFov = fov;
+	curEndurance = enduranceMax;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -89,7 +73,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("ChangeCamSide", IE_Pressed, this, &ADeathRocket_ProtoCharacter::changeCamSide);
@@ -97,7 +81,6 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
-	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADeathRocket_ProtoCharacter::StopSprint);
@@ -118,11 +101,8 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!reloading)
-	{
-		FRotator rotation = GetControlRotation();
-		SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
-	}
+	FRotator rotation = GetControlRotation();
+	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 
 	FVector actualCamLoc = FollowCamera->GetRelativeLocation();
 	FVector newSide = FMath::VInterpTo(actualCamLoc, { actualCamLoc.X, cameraYOffset * shoulder, actualCamLoc.Z }, DeltaTime, 10.f);
@@ -130,39 +110,25 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 
 	FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
 
-	if (sprinting && !GetCharacterMovement()->Velocity.Equals(FVector::ZeroVector))
+	if (sprinting)
 	{
-		float deltaConsumption = 0.f;
-		if (curSprintTime <= dashMaxTime && dashActivate)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = dashingSpeed;
-			deltaConsumption = consumptionSeconds * 1.5f * DeltaTime;
-		}
+		if (curSprintTime <= sprintMaxTime)
+			GetCharacterMovement()->MaxWalkSpeed = sprintingSpeed;
 		else
-		{
 			GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
-			deltaConsumption = consumptionSeconds * DeltaTime;
-		}
-		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curFov));
 
 		curSprintTime += DeltaTime;
-		curStamina -= deltaConsumption;
+		curEndurance -= consumptionSeconds * DeltaTime;
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curEndurance));
 
-		if (curStamina <= 0.f)
-		{
-			staminaRecup = true;
+		if (curEndurance <= 0.f)
 			StopSprint();
-		}
 	}
 	else
 	{
-		curStamina = FMath::Min(curStamina + recuperationSeconds * DeltaTime, maxStamina);
-		if (curStamina >= maxStamina)
-			staminaRecup = false;
+		curEndurance = FMath::Min(curEndurance + recuperationSeconds * DeltaTime, enduranceMax);
 	}
 
-	staminaRatio = curStamina / maxStamina;
-	UpdateTimersProgress();
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -179,9 +145,6 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
-	if (reloading)
-		return;
-
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is forward
@@ -196,9 +159,6 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
-	if (reloading)
-		return;
-
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
@@ -212,65 +172,13 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 	}
 }
 
-void ADeathRocket_ProtoCharacter::Jump()
-{
-	if (reloading)
-		return;
-
-	Super::Jump();
-}
-
 void ADeathRocket_ProtoCharacter::Fire()
 {
-	if (firing || reloading || curAmmo <= 0)
-		return;
-
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	FVector camLoc = FollowCamera->GetRelativeLocation();
 	FVector location = RocketLuncher->GetSocketLocation(FName("RocketCanon"));
 	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
-
-	firing = true;
-	--curAmmo;
-	OnAmmoUpdate.Broadcast();
-
-	fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
-}
-
-void ADeathRocket_ProtoCharacter::EndFire()
-{
-	firing = false;
-}
-
-void ADeathRocket_ProtoCharacter::Reload()
-{
-	// Check if player is jumping
-	if (curAmmo == ammoMax || reloading || GetVelocity().Z != 0.f)
-		return;
-
-	reloading = true;
-	StopAiming();
-	StopSprint();
-
-	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
-}
-
-void ADeathRocket_ProtoCharacter::EndReload()
-{
-	curAmmo = ammoMax;
-	OnAmmoUpdate.Broadcast();
-
-	reloading = false;
-}
-
-void ADeathRocket_ProtoCharacter::UpdateTimersProgress()
-{
-	float ratio = fireTimer->GetProgess();
-	fireProgress = ratio < 0.f ? 0.f : ratio;
-
-	ratio = reloadTimer->GetProgess();
-	reloadProgress = ratio < 0.f ? 0.f : ratio;
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()
@@ -280,10 +188,6 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
-	if (reloading)
-		return;
-	StopSprint();
-
 	curFov = ads;
 }
 
@@ -292,45 +196,14 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 	curFov = fov;
 }
 
-void ADeathRocket_ProtoCharacter::TakeDamage()
-{
-	--curHealth;
-	healthRatio = (float)curHealth / (float)healthMax;
-	OnHealthUpdate.Broadcast();
-
-	if (curHealth <= 0)
-		Die();
-}
-
-void ADeathRocket_ProtoCharacter::Die()
-{
-
-}
-
 void ADeathRocket_ProtoCharacter::Sprint()
 {
-	if (reloading || staminaRecup)
-		return;
-
-	StopAiming();
-
-	curSprintTime = dashRecovering ? dashMaxTime : 0.f;
-	curFov = rds;
 	sprinting = true;
-
-	dashRecovering = true;
-	dashRecoveryTimer->Reset(this, &ADeathRocket_ProtoCharacter::RecoverDash);
 }
 
 void ADeathRocket_ProtoCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = walkingSpeed;
 	curSprintTime = 0.f;
-	curFov = fov;
 	sprinting = false;
-}
-
-void ADeathRocket_ProtoCharacter::RecoverDash()
-{
-	dashRecovering = false;
 }
