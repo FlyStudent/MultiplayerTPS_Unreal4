@@ -181,7 +181,7 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 
 void ADeathRocket_ProtoCharacter::Fire()
 {
-	if (curAmmo <= 0)
+	if (firing || reloading || curAmmo <= 0)
 		return;
 
 	FActorSpawnParameters spawnParams;
@@ -190,14 +190,37 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FVector location = RocketLuncher->GetSocketLocation(FName("RocketCanon"));
 	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
 
+	firing = true;
 	--curAmmo;
 	OnAmmoUpdate.Broadcast();
+
+	GetWorldTimerManager().ClearTimer(fireTimer);
+	GetWorldTimerManager().SetTimer(fireTimer, this, &ADeathRocket_ProtoCharacter::EndFire, fireRate, false);
+}
+
+void ADeathRocket_ProtoCharacter::EndFire()
+{
+	firing = false;
 }
 
 void ADeathRocket_ProtoCharacter::Reload()
 {
+	// Check if player is jumping
+	if (reloading || GetVelocity().Z != 0.f)
+		return;
+
+	reloading = true;
+
+	GetWorldTimerManager().ClearTimer(reloadTimer);
+	GetWorldTimerManager().SetTimer(reloadTimer, this, &ADeathRocket_ProtoCharacter::EndReload, reloadTime, false);
+}
+
+void ADeathRocket_ProtoCharacter::EndReload()
+{
 	curAmmo = ammoMax;
 	OnAmmoUpdate.Broadcast();
+
+	reloading = false;
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()
