@@ -74,7 +74,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("ChangeCamSide", IE_Pressed, this, &ADeathRocket_ProtoCharacter::changeCamSide);
@@ -148,6 +148,9 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
+	if (reloading)
+		return;
+
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is forward
@@ -162,6 +165,9 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
+	if (reloading)
+		return;
+
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
@@ -173,6 +179,14 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ADeathRocket_ProtoCharacter::Jump()
+{
+	if (reloading)
+		return;
+
+	Super::Jump();
 }
 
 void ADeathRocket_ProtoCharacter::Fire()
@@ -226,6 +240,9 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
+	if (reloading)
+		return;
+
 	curFov = ads;
 }
 
@@ -251,6 +268,9 @@ void ADeathRocket_ProtoCharacter::Die()
 
 void ADeathRocket_ProtoCharacter::Sprint()
 {
+	if (reloading)
+		return;
+
 	sprinting = true;
 }
 
