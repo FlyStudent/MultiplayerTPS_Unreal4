@@ -49,21 +49,24 @@ protected:
 	bool firing = false;
 	bool reloading = false;
 
-	//FTimerHandle fireTimer;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float fireRate = 1.f;
-
-	//FTimerHandle reloadTimer;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float reloadTime = 5.f;
 
 	class Timer* fireTimer;
 	class Timer* reloadTimer;
+	// for the UI
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float fireProgress = 0.f;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float reloadProgress = 0.f;
 
 	void Fire();
 	void EndFire();
 	void Reload();
 	void EndReload();
+	void UpdateTimersProgress();
 
 	// CAMERA
 	int   shoulder = 1;

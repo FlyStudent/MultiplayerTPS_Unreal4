@@ -145,6 +145,7 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	}
 
 	staminaRatio = curEndurance / enduranceMax;
+	UpdateTimersProgress();
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -233,6 +234,8 @@ void ADeathRocket_ProtoCharacter::Reload()
 		return;
 
 	reloading = true;
+	StopAiming();
+	StopSprint();
 
 	reloadTimer->Clear();
 	reloadTimer->Set(this, &ADeathRocket_ProtoCharacter::EndReload);
@@ -246,6 +249,15 @@ void ADeathRocket_ProtoCharacter::EndReload()
 	reloading = false;
 }
 
+void ADeathRocket_ProtoCharacter::UpdateTimersProgress()
+{
+	float ratio = fireTimer->GetProgess();
+	fireProgress = ratio < 0.f ? 0.f : ratio;
+
+	ratio = reloadTimer->GetProgess();
+	reloadProgress = ratio < 0.f ? 0.f : ratio;
+}
+
 void ADeathRocket_ProtoCharacter::changeCamSide()
 {
 	shoulder *= -1;
@@ -257,6 +269,7 @@ void ADeathRocket_ProtoCharacter::Aim()
 		return;
 
 	curFov = ads;
+	StopSprint();
 }
 
 void ADeathRocket_ProtoCharacter::StopAiming()
@@ -285,6 +298,7 @@ void ADeathRocket_ProtoCharacter::Sprint()
 		return;
 
 	sprinting = true;
+	StopAiming();
 }
 
 void ADeathRocket_ProtoCharacter::StopSprint()
