@@ -26,11 +26,11 @@ public:
 	ADeathRocket_ProtoCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
 protected:
@@ -43,8 +43,22 @@ protected:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
+	// ROCKET LAUNCHER
+	bool firing = false;
+	bool reloading = false;
+
+	FTimerHandle fireTimer;
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	float fireRate = 1.f;
+
+	FTimerHandle reloadTimer;
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	float reloadTime = 5.f;
+
 	void Fire();
+	void EndFire();
 	void Reload();
+	void EndReload();
 
 	// CAMERA
 	int   shoulder = 1;
