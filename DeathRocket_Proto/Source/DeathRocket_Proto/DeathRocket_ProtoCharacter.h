@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "DeathRocket_ProtoCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealthEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
+
 UCLASS(config=Game)
 class ADeathRocket_ProtoCharacter : public ACharacter
 {
@@ -34,7 +37,6 @@ public:
 	float BaseLookUpRate;
 
 protected:
-
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ARocket> rocketClass;
 
@@ -45,6 +47,7 @@ protected:
 	void LookUpAtRate(float Rate);
 
 	void Fire();
+	void Reload();
 
 	// CAMERA
 	int   shoulder = 1;
@@ -54,9 +57,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float ads = 50.f;
 	// BASIC Field of view (when not aiming)
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	float fov = 90.f;
+	float fov;
 	float curFov;
+
+	// HEALTH
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
+	int   healthMax = 2;
+	int   curHealth;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float healthRatio = 1.f;
+
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FHealthEvent OnHealthUpdate;
 
 	// SPRINT
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -66,7 +78,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float sprintingSpeed = 3000.f;
 
-	bool sprinting = false;
+	bool  sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float sprintMaxTime = 0.2f;
 	float curSprintTime = 0.f;
@@ -74,16 +86,30 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float enduranceMax = 100.f;
 	float curEndurance;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	float staminaRatio = 1.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float consumptionSeconds = 40.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float recuperationSeconds = 30.f;
-	// METHODS
 
+	// AMMUNITION
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	int   ammoMax = 3;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	int   curAmmo;
+
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FAmmoEvent OnAmmoUpdate;
+
+	// METHODS
 	void changeCamSide();
 	void Aim();
 	void StopAiming();
+
+	void TakeDamage();
+	void Die();
 
 	void Sprint();
 	void StopSprint();
@@ -93,10 +119,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 };
-
