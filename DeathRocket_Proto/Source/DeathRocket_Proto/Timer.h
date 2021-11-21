@@ -7,7 +7,6 @@ class DEATHROCKET_PROTO_API Timer
 private:
 	FTimerHandle	timer;
 	float			time = 1.f;
-	float			progress = 0.f;
 
 	class UWorld*	world;
 

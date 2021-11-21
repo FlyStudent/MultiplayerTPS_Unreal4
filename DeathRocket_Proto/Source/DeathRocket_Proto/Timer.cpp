@@ -14,7 +14,6 @@ void Timer::Clear()
 		return;
 
 	world->GetTimerManager().ClearTimer(timer);
-	progress = 0.f;
 }
 
 float Timer::GetProgess()
@@ -23,7 +22,5 @@ float Timer::GetProgess()
 		return 0.f;
 
 	float elapsed = world->GetTimerManager().GetTimerElapsed(timer);
-	progress = elapsed / time;
-
-	return progress;
+	return elapsed / time;
 }
