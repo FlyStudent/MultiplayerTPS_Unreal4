@@ -18,7 +18,6 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -52,14 +51,20 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	// Setting values
+	curEndurance = enduranceMax;
+	curHealth = healthMax;
+	curAmmo = ammoMax;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Setting values
+	fov = FollowCamera->FieldOfView;
 	curFov = fov;
-	curEndurance = enduranceMax;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -77,6 +82,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADeathRocket_ProtoCharacter::StopSprint);
@@ -125,6 +131,7 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		curEndurance = FMath::Min(curEndurance + recuperationSeconds * DeltaTime, enduranceMax);
 	}
 
+	staminaRatio = curEndurance / enduranceMax;
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -170,11 +177,23 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 
 void ADeathRocket_ProtoCharacter::Fire()
 {
+	if (curAmmo <= 0)
+		return;
+
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	FVector camLoc = FollowCamera->GetRelativeLocation();
 	FVector location = GetActorLocation() + GetActorForwardVector() * 80.f + GetActorRightVector() * camLoc.Y + GetActorUpVector() * camLoc.Z;
 	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
+
+	--curAmmo;
+	OnAmmoUpdate.Broadcast();
+}
+
+void ADeathRocket_ProtoCharacter::Reload()
+{
+	curAmmo = ammoMax;
+	OnAmmoUpdate.Broadcast();
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()
@@ -190,6 +209,21 @@ void ADeathRocket_ProtoCharacter::Aim()
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
 	curFov = fov;
+}
+
+void ADeathRocket_ProtoCharacter::TakeDamage()
+{
+	--curHealth;
+	healthRatio = (float)curHealth / (float)healthMax;
+	OnHealthUpdate.Broadcast();
+
+	if (curHealth <= 0)
+		Die();
+}
+
+void ADeathRocket_ProtoCharacter::Die()
+{
+
 }
 
 void ADeathRocket_ProtoCharacter::Sprint()
