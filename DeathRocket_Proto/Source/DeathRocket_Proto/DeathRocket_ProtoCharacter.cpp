@@ -10,6 +10,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "Rocket.h"
+#include "Timer.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ADeathRocket_ProtoCharacter
@@ -58,9 +59,18 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	curAmmo = ammoMax;
 }
 
+ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
+{
+	delete fireTimer;
+	delete reloadTimer;
+}
+
 void ADeathRocket_ProtoCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	fireTimer = new Timer(GetWorld(), fireRate);
+	reloadTimer = new Timer(GetWorld(), reloadTime);
 
 	// Setting values
 	fov = FollowCamera->FieldOfView;
@@ -207,8 +217,8 @@ void ADeathRocket_ProtoCharacter::Fire()
 	--curAmmo;
 	OnAmmoUpdate.Broadcast();
 
-	GetWorldTimerManager().ClearTimer(fireTimer);
-	GetWorldTimerManager().SetTimer(fireTimer, this, &ADeathRocket_ProtoCharacter::EndFire, fireRate, false);
+	fireTimer->Clear();
+	fireTimer->Set(this, &ADeathRocket_ProtoCharacter::EndFire);
 }
 
 void ADeathRocket_ProtoCharacter::EndFire()
@@ -224,8 +234,8 @@ void ADeathRocket_ProtoCharacter::Reload()
 
 	reloading = true;
 
-	GetWorldTimerManager().ClearTimer(reloadTimer);
-	GetWorldTimerManager().SetTimer(reloadTimer, this, &ADeathRocket_ProtoCharacter::EndReload, reloadTime, false);
+	reloadTimer->Clear();
+	reloadTimer->Set(this, &ADeathRocket_ProtoCharacter::EndReload);
 }
 
 void ADeathRocket_ProtoCharacter::EndReload()
