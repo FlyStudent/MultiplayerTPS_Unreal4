@@ -107,8 +107,11 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FRotator rotation = GetControlRotation();
-	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
+	if (!reloading)
+	{
+		FRotator rotation = GetControlRotation();
+		SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
+	}
 
 	FVector actualCamLoc = FollowCamera->GetRelativeLocation();
 	FVector newSide = FMath::VInterpTo(actualCamLoc, { actualCamLoc.X, cameraYOffset * shoulder, actualCamLoc.Z }, DeltaTime, 10.f);
@@ -206,7 +209,7 @@ void ADeathRocket_ProtoCharacter::EndFire()
 void ADeathRocket_ProtoCharacter::Reload()
 {
 	// Check if player is jumping
-	if (reloading || GetVelocity().Z != 0.f)
+	if (curAmmo == ammoMax || reloading || GetVelocity().Z != 0.f)
 		return;
 
 	reloading = true;
