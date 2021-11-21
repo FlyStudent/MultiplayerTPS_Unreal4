@@ -27,6 +27,7 @@ class ADeathRocket_ProtoCharacter : public ACharacter
 
 public:
 	ADeathRocket_ProtoCharacter();
+	~ADeathRocket_ProtoCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
@@ -50,13 +51,16 @@ protected:
 	bool firing = false;
 	bool reloading = false;
 
-	FTimerHandle fireTimer;
+	//FTimerHandle fireTimer;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float fireRate = 1.f;
 
-	FTimerHandle reloadTimer;
+	//FTimerHandle reloadTimer;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float reloadTime = 5.f;
+
+	class Timer* fireTimer;
+	class Timer* reloadTimer;
 
 	void Fire();
 	void EndFire();
