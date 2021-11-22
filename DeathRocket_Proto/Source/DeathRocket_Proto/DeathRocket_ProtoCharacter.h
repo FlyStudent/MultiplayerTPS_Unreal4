@@ -78,9 +78,9 @@ protected:
 	// Aim Down Sight (when aiming)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float ads = 50.f;
-	// Run Down Sight (when running)
+	// Run fov (when running)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-	float rds = 80.f;
+	float runFov = 110.f;
 	// BASIC Field of view (when not aiming)
 	float fov;
 	float curFov;

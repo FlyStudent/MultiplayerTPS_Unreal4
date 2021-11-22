@@ -316,7 +316,7 @@ void ADeathRocket_ProtoCharacter::Sprint()
 	StopAiming();
 
 	curSprintTime = dashRecovering ? dashMaxTime : 0.f;
-	curFov = rds;
+	curFov = runFov;
 	sprinting = true;
 
 	dashRecovering = true;
