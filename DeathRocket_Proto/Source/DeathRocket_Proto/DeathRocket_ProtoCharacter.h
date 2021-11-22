@@ -94,16 +94,24 @@ protected:
 
 	// SPRINT
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool dashActivate = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float walkingSpeed = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float runningSpeed = 1000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float sprintingSpeed = 3000.f;
+	float dashingSpeed = 10000.f;
 
 	bool  sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float sprintMaxTime = 0.2f;
+	float dashMaxTime = 0.05f;
 	float curSprintTime = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float dashRecoveryTime = 1.f;
+	bool dashRecovering = false;
+	class Timer* dashRecoveryTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float maxStamina = 100.f;
@@ -136,6 +144,8 @@ protected:
 
 	void Sprint();
 	void StopSprint();
+	void RecoverDash();
+
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 

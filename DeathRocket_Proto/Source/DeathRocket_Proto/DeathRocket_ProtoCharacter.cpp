@@ -34,7 +34,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// Configure character movement
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->GravityScale = 2.5f;
-	GetCharacterMovement()->MaxAcceleration = 10000.f;
+	GetCharacterMovement()->MaxAcceleration = 100000.f;
 	GetCharacterMovement()->JumpZVelocity = 1300.f;
 	GetCharacterMovement()->AirControl = 0.3f;
 	GetCharacterMovement()->FallingLateralFriction = 0.5f;
@@ -71,6 +71,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
+	dashRecoveryTimer = new Timer(GetWorld(), dashRecoveryTime);
 
 	// Setting values
 	fov = FollowCamera->FieldOfView;
@@ -127,14 +128,21 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 
 	if (sprinting && !GetCharacterMovement()->Velocity.Equals(FVector::ZeroVector))
 	{
-		if (curSprintTime <= sprintMaxTime)
-			GetCharacterMovement()->MaxWalkSpeed = sprintingSpeed;
+		float deltaConsumption = 0.f;
+		if (curSprintTime <= dashMaxTime && dashActivate)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = dashingSpeed;
+			deltaConsumption = consumptionSeconds * 1.5f * DeltaTime;
+		}
 		else
+		{
 			GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
+			deltaConsumption = consumptionSeconds * DeltaTime;
+		}
 		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curFov));
 
 		curSprintTime += DeltaTime;
-		curStamina -= consumptionSeconds * DeltaTime;
+		curStamina -= deltaConsumption;
 
 		if (curStamina <= 0.f)
 		{
@@ -302,8 +310,12 @@ void ADeathRocket_ProtoCharacter::Sprint()
 
 	StopAiming();
 
+	curSprintTime = dashRecovering ? dashMaxTime : 0.f;
 	curFov = rds;
 	sprinting = true;
+
+	dashRecovering = true;
+	dashRecoveryTimer->Reset(this, &ADeathRocket_ProtoCharacter::RecoverDash);
 }
 
 void ADeathRocket_ProtoCharacter::StopSprint()
@@ -312,4 +324,9 @@ void ADeathRocket_ProtoCharacter::StopSprint()
 	curSprintTime = 0.f;
 	curFov = fov;
 	sprinting = false;
+}
+
+void ADeathRocket_ProtoCharacter::RecoverDash()
+{
+	dashRecovering = false;
 }
