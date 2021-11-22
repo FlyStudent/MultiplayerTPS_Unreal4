@@ -218,6 +218,12 @@ void ADeathRocket_ProtoCharacter::Fire()
 	--curAmmo;
 	OnAmmoUpdate.Broadcast();
 
+	if (curAmmo == 0)
+	{
+		EndFire();
+		return;
+	}
+
 	fireTimer->Clear();
 	fireTimer->Set(this, &ADeathRocket_ProtoCharacter::EndFire);
 }
