@@ -180,6 +180,7 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		reloadTimer->Resume();
 
 	UpdateTimersProgress();
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Move"));
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -196,7 +197,10 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f))
+	if (stopMovement && Value == 0.0f)
+		stopMovement = false;
+
+	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovement)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -210,7 +214,7 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f))
+	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovement)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -230,8 +234,14 @@ void ADeathRocket_ProtoCharacter::Jump()
 
 void ADeathRocket_ProtoCharacter::Fire()
 {
-	if (firing || reloading || curAmmo <= 0)
+	if (firing || curAmmo <= 0)
 		return;
+
+	if (reloading)
+	{
+		reloading = false;
+		reloadTimer->Clear();
+	}
 
 	FRotator rotation = GetControlRotation();
 	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
@@ -263,10 +273,10 @@ void ADeathRocket_ProtoCharacter::EndFire()
 void ADeathRocket_ProtoCharacter::Reload()
 {
 	// Check if player is jumping
-	if (curAmmo == ammoMax || reloading || GetVelocity().Z != 0.f)
+	if (curAmmo == ammoMax || reloading)
 		return;
 
-	reloading = true;
+	reloading = stopMovement = true;
 	StopAiming();
 
 	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
@@ -296,7 +306,7 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
-	if (reloading)
+	if (reloading && curAmmo <= 0)
 		return;
 	StopSprint();
 

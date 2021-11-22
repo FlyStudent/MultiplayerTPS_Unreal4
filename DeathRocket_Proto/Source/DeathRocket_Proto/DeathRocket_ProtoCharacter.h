@@ -48,9 +48,10 @@ protected:
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
 
-	// ROCKET LAUNCHER
+	// FIRE AND RELOAD
 	bool firing = false;
 	bool reloading = false;
+	bool stopMovement = false;
 
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float fireRate = 1.f;
