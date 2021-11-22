@@ -124,19 +124,24 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!reloading)
+	bool isMoving = !GetCharacterMovement()->Velocity.Equals(FVector::ZeroVector);
+	if (isMoving || curFov == ads)
 	{
 		FRotator rotation = GetControlRotation();
 		SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 	}
 
-	FVector actualCamLoc = FollowCamera->GetRelativeLocation();
-	FVector newSide = FMath::VInterpTo(actualCamLoc, { actualCamLoc.X, cameraYOffset * shoulder, actualCamLoc.Z }, DeltaTime, 10.f);
-	FollowCamera->SetRelativeLocation(newSide);
+	// Camera
+	{ 
+		FVector actualCamLoc = FollowCamera->GetRelativeLocation();
+		FVector newSide = FMath::VInterpTo(actualCamLoc, { actualCamLoc.X, cameraYOffset * shoulder, actualCamLoc.Z }, DeltaTime, 10.f);
+		FollowCamera->SetRelativeLocation(newSide);
 
-	FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
+		FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
+	} 
 
-	if (sprinting && !GetCharacterMovement()->Velocity.Equals(FVector::ZeroVector))
+	// Stamina
+	if (sprinting && isMoving)
 	{
 		float deltaConsumption = 0.f;
 		if (curSprintTime <= dashMaxTime && dashActivate)
@@ -166,8 +171,14 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		if (curStamina >= maxStamina)
 			staminaRecup = false;
 	}
-
 	staminaRatio = curStamina / maxStamina;
+
+	// Reload
+	if (reloading && isMoving)
+		reloadTimer->Pause();
+	else if (reloading)
+		reloadTimer->Resume();
+
 	UpdateTimersProgress();
 }
 
@@ -185,9 +196,6 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
-	if (reloading)
-		return;
-
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is forward
@@ -202,9 +210,6 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
-	if (reloading)
-		return;
-
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
@@ -220,9 +225,6 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 
 void ADeathRocket_ProtoCharacter::Jump()
 {
-	if (reloading)
-		return;
-
 	Super::Jump();
 }
 
@@ -230,6 +232,9 @@ void ADeathRocket_ProtoCharacter::Fire()
 {
 	if (firing || reloading || curAmmo <= 0)
 		return;
+
+	FRotator rotation = GetControlRotation();
+	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -243,6 +248,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	if (curAmmo == 0)
 	{
 		EndFire();
+		Reload();
 		return;
 	}
 	fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
@@ -262,7 +268,6 @@ void ADeathRocket_ProtoCharacter::Reload()
 
 	reloading = true;
 	StopAiming();
-	StopSprint();
 
 	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
 }
@@ -315,7 +320,7 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 
 void ADeathRocket_ProtoCharacter::Sprint()
 {
-	if (reloading || staminaRecup)
+	if (staminaRecup)
 		return;
 
 	StopAiming();
