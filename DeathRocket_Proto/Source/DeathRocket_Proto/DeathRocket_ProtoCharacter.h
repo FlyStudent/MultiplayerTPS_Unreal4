@@ -77,6 +77,9 @@ protected:
 	// Aim Down Sight (when aiming)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float ads = 50.f;
+	// Run Down Sight (when running)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	float rds = 80.f;
 	// BASIC Field of view (when not aiming)
 	float fov;
 	float curFov;
@@ -105,10 +108,11 @@ protected:
 	float curSprintTime = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float enduranceMax = 100.f;
-	float curEndurance;
+	float maxStamina = 100.f;
+	float curStamina;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float staminaRatio = 1.f;
+	bool staminaRecup = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float consumptionSeconds = 40.f;

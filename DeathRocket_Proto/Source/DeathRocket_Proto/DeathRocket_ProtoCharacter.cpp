@@ -58,7 +58,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
 	// Setting values
-	curEndurance = enduranceMax;
+	curStamina = maxStamina;
 	curHealth = healthMax;
 	curAmmo = ammoMax;
 }
@@ -88,7 +88,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("ChangeCamSide", IE_Pressed, this, &ADeathRocket_ProtoCharacter::changeCamSide);
@@ -129,26 +129,31 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 
 	FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
 
-	if (sprinting)
+	if (sprinting && !GetCharacterMovement()->Velocity.Equals(FVector::ZeroVector))
 	{
 		if (curSprintTime <= sprintMaxTime)
 			GetCharacterMovement()->MaxWalkSpeed = sprintingSpeed;
 		else
 			GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
+		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curFov));
 
 		curSprintTime += DeltaTime;
-		curEndurance -= consumptionSeconds * DeltaTime;
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curEndurance));
+		curStamina -= consumptionSeconds * DeltaTime;
 
-		if (curEndurance <= 0.f)
+		if (curStamina <= 0.f)
+		{
+			staminaRecup = true;
 			StopSprint();
+		}
 	}
 	else
 	{
-		curEndurance = FMath::Min(curEndurance + recuperationSeconds * DeltaTime, enduranceMax);
+		curStamina = FMath::Min(curStamina + recuperationSeconds * DeltaTime, maxStamina);
+		if (curStamina >= maxStamina)
+			staminaRecup = false;
 	}
 
-	staminaRatio = curEndurance / enduranceMax;
+	staminaRatio = curStamina / maxStamina;
 	UpdateTimersProgress();
 }
 
@@ -166,6 +171,9 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
+	if (reloading)
+		return;
+
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is forward
@@ -180,6 +188,9 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
+	if (reloading)
+		return;
+
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
@@ -191,6 +202,14 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ADeathRocket_ProtoCharacter::Jump()
+{
+	if (reloading)
+		return;
+
+	Super::Jump();
 }
 
 void ADeathRocket_ProtoCharacter::Fire()
@@ -208,8 +227,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	--curAmmo;
 	OnAmmoUpdate.Broadcast();
 
-	fireTimer->Clear();
-	fireTimer->Set(this, &ADeathRocket_ProtoCharacter::EndFire);
+	fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
 }
 
 void ADeathRocket_ProtoCharacter::EndFire()
@@ -227,8 +245,7 @@ void ADeathRocket_ProtoCharacter::Reload()
 	StopAiming();
 	StopSprint();
 
-	reloadTimer->Clear();
-	reloadTimer->Set(this, &ADeathRocket_ProtoCharacter::EndReload);
+	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
 }
 
 void ADeathRocket_ProtoCharacter::EndReload()
@@ -255,8 +272,11 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
-	curFov = ads;
+	if (reloading)
+		return;
 	StopSprint();
+
+	curFov = ads;
 }
 
 void ADeathRocket_ProtoCharacter::StopAiming()
@@ -281,13 +301,19 @@ void ADeathRocket_ProtoCharacter::Die()
 
 void ADeathRocket_ProtoCharacter::Sprint()
 {
-	sprinting = true;
+	if (reloading || staminaRecup)
+		return;
+
 	StopAiming();
+
+	curFov = rds;
+	sprinting = true;
 }
 
 void ADeathRocket_ProtoCharacter::StopSprint()
 {
 	GetCharacterMovement()->MaxWalkSpeed = walkingSpeed;
 	curSprintTime = 0.f;
+	curFov = fov;
 	sprinting = false;
 }
