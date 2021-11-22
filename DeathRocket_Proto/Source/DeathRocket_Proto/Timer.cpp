@@ -8,6 +8,17 @@ Timer::Timer(UWorld* w, float t)
 
 }
 
+void Timer::Pause()
+{
+	world->GetTimerManager().PauseTimer(timer);
+}
+
+void Timer::Resume()
+{
+	world->GetTimerManager().UnPauseTimer(timer);
+}
+
+
 void Timer::Clear()
 {
 	if (!world)
@@ -16,7 +27,7 @@ void Timer::Clear()
 	world->GetTimerManager().ClearTimer(timer);
 }
 
-float Timer::GetProgess()
+float Timer::GetProgess() const
 {
 	if (!world)
 		return 0.f;

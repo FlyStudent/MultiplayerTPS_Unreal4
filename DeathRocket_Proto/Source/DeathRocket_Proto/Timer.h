@@ -14,13 +14,15 @@ public:
 	Timer() = default;
 	Timer(class UWorld* world, float time);
 
+	void Pause();
+	void Resume();
 	void Clear();
 	template< class UserClass >
 	void Set(UserClass* obj, typename FTimerDelegate::TUObjectMethodDelegate< UserClass >::FMethodPtr InTimerMethod);
 	template< class UserClass >
 	void Reset(UserClass* obj, typename FTimerDelegate::TUObjectMethodDelegate< UserClass >::FMethodPtr InTimerMethod);
 
-	float GetProgess();
+	float GetProgess() const;
 };
 
 template< class UserClass >
