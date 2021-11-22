@@ -3,6 +3,7 @@
 #include "DeathRocket_ProtoCharacter.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
+#include "HealthComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -50,6 +51,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -59,7 +61,6 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Setting values
 	curStamina = maxStamina;
-	curHealth = healthMax;
 	curAmmo = ammoMax;
 }
 
@@ -80,6 +81,11 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	// Setting values
 	fov = FollowCamera->FieldOfView;
 	curFov = fov;
+
+	if (healthComp)
+	{
+		healthComp->OnKill.AddDynamic(this, &ADeathRocket_ProtoCharacter::OnDeath);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -294,15 +300,10 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 
 void ADeathRocket_ProtoCharacter::TakeDamage()
 {
-	--curHealth;
-	healthRatio = (float)curHealth / (float)healthMax;
-	OnHealthUpdate.Broadcast();
-
-	if (curHealth <= 0)
-		Die();
+	healthComp->Hurt(1);
 }
 
-void ADeathRocket_ProtoCharacter::Die()
+void ADeathRocket_ProtoCharacter::OnDeath()
 {
 
 }

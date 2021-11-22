@@ -84,15 +84,8 @@ protected:
 	float fov;
 	float curFov;
 
-	// HEALTH
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Health, meta = (AllowPrivateAccess = "true"))
-	int   healthMax = 2;
-	int   curHealth;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float healthRatio = 1.f;
-
-	UPROPERTY(BlueprintAssignable, Category = Event)
-	FHealthEvent OnHealthUpdate;
 
 	// SPRINT
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -142,7 +135,9 @@ protected:
 	void StopAiming();
 
 	void TakeDamage();
-	void Die();
+
+	UFUNCTION()
+	void OnDeath();
 
 	void Sprint();
 	void StopSprint();
@@ -154,6 +149,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	class UHealthComponent* healthComp;
+
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
