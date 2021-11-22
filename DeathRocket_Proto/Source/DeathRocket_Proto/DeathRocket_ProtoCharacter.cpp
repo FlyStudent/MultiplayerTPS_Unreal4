@@ -51,8 +51,8 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	// Create Rocket Luncher
-	RocketLuncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
-	RocketLuncher->SetupAttachment(GetMesh(), "RightArm");
+	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
+	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -228,7 +228,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	FVector camLoc = FollowCamera->GetRelativeLocation();
-	FVector location = RocketLuncher->GetSocketLocation(FName("RocketCanon"));
+	FVector location = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
 	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
 
 	firing = true;

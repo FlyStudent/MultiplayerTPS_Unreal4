@@ -23,7 +23,7 @@ class ADeathRocket_ProtoCharacter : public ACharacter
 	class UCameraComponent* FollowCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
-		USkeletalMeshComponent* RocketLuncher;
+	USkeletalMeshComponent* RocketLauncher;
 
 public:
 	ADeathRocket_ProtoCharacter();
