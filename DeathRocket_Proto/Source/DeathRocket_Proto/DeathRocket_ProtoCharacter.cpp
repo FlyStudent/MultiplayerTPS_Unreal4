@@ -52,7 +52,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Create Rocket Luncher
 	RocketLuncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
-	RocketLuncher->SetupAttachment(GetMesh(), "RightForeArm");
+	RocketLuncher->SetupAttachment(GetMesh(), "RightArm");
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -228,7 +228,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	FVector camLoc = FollowCamera->GetRelativeLocation();
-	FVector location = GetActorLocation() + GetActorForwardVector() * 80.f + GetActorRightVector() * camLoc.Y + GetActorUpVector() * camLoc.Z;
+	FVector location = RocketLuncher->GetSocketLocation(FName("RocketCanon"));
 	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
 
 	firing = true;
