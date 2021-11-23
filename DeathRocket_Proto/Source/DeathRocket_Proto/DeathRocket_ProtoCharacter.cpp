@@ -11,6 +11,7 @@
 
 #include "HealthComponent.h"
 #include "SprintComponent.h"
+#include "UltimeLoaderComponent.h"
 #include "Rocket.h"
 #include "Timer.h"
 
@@ -59,6 +60,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
+	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");

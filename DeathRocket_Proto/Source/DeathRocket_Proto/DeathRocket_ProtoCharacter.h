@@ -140,6 +140,8 @@ public:
 	class UHealthComponent* healthComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	class USprintComponent* sprintComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	class UUltimeLoaderComponent* ultimeComp;
 
 	virtual void Tick(float DeltaTime) override;
 
