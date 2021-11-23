@@ -13,6 +13,8 @@ ARocket::ARocket()
     CollisionComp->InitSphereRadius(5.0f);
     CollisionComp->BodyInstance.SetCollisionProfileName("Rocket");
     //CollisionComp->OnComponentHit.AddDynamic(this, &AMyProjectProjectile::OnHit);        // set up a notification for when this component hits something blocking
+    CollisionComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+    CollisionComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
     // Players can't walk on it
     CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));

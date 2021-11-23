@@ -6,8 +6,8 @@
 #include "GameFramework/Character.h"
 #include "DeathRocket_ProtoCharacter.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealthEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
 UCLASS(config=Game)
 class ADeathRocket_ProtoCharacter : public ACharacter
@@ -43,7 +43,6 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-	void Jump();
 
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
@@ -66,11 +65,19 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float reloadProgress = 0.f;
 
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FWidgetEvent OnFireCDUpdate;
+	bool lastFireUpdate = false;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FWidgetEvent OnReloadCDUpdate;
+	bool lastReloadUpdate = false;
+
 	void Fire();
 	void EndFire();
 	void Reload();
 	void EndReload();
 	void UpdateTimersProgress();
+	void BroadcastUIUpdate();
 
 	// CAMERA
 	int   shoulder = 1;
@@ -121,6 +128,10 @@ protected:
 	float consumptionSeconds = 40.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float recuperationSeconds = 30.f;
+
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FWidgetEvent OnStaminaUpdate;
+	bool lastStaminaUpdate = false;
 
 	// AMMUNITION
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))

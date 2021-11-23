@@ -51,6 +51,11 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
@@ -68,6 +73,7 @@ ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
 {
 	delete fireTimer;
 	delete reloadTimer;
+	delete dashRecoveryTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
@@ -180,6 +186,7 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		reloadTimer->Resume();
 
 	UpdateTimersProgress();
+	BroadcastUIUpdate();
 	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Move"));
 }
 
@@ -227,11 +234,6 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 	}
 }
 
-void ADeathRocket_ProtoCharacter::Jump()
-{
-	Super::Jump();
-}
-
 void ADeathRocket_ProtoCharacter::Fire()
 {
 	if (firing || curAmmo <= 0)
@@ -262,7 +264,6 @@ void ADeathRocket_ProtoCharacter::Fire()
 		return;
 	}
 	fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
-
 }
 
 void ADeathRocket_ProtoCharacter::EndFire()
@@ -297,6 +298,42 @@ void ADeathRocket_ProtoCharacter::UpdateTimersProgress()
 
 	ratio = reloadTimer->GetProgess();
 	reloadProgress = ratio < 0.f ? 0.f : ratio;
+}
+
+void ADeathRocket_ProtoCharacter::BroadcastUIUpdate()
+{
+	if (fireProgress > 0.f)
+	{
+		OnFireCDUpdate.Broadcast(true);
+		lastFireUpdate = true;
+	}
+	else if (lastFireUpdate)
+	{
+		OnFireCDUpdate.Broadcast(false);
+		lastFireUpdate = false;
+	}
+
+	if (reloadProgress > 0.f)
+	{
+		OnReloadCDUpdate.Broadcast(true);
+		lastReloadUpdate = true;
+	}
+	else if (lastReloadUpdate)
+	{
+		OnReloadCDUpdate.Broadcast(false);
+		lastReloadUpdate = false;
+	}
+
+	if (staminaRatio < 1.f)
+	{
+		OnStaminaUpdate.Broadcast(true);
+		lastStaminaUpdate = true;
+	}
+	else if (lastStaminaUpdate)
+	{
+		OnStaminaUpdate.Broadcast(false);
+		lastStaminaUpdate = false;
+	}
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()
