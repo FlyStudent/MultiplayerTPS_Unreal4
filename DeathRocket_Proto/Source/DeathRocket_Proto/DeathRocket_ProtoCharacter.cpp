@@ -3,13 +3,14 @@
 #include "DeathRocket_ProtoCharacter.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
-#include "HealthComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 
+#include "HealthComponent.h"
+#include "SprintComponent.h"
 #include "Rocket.h"
 #include "Timer.h"
 
@@ -52,6 +53,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -60,7 +62,6 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
 	// Setting values
-	curStamina = maxStamina;
 	curAmmo = ammoMax;
 }
 
@@ -76,7 +77,6 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
-	dashRecoveryTimer = new Timer(GetWorld(), dashRecoveryTime);
 
 	// Setting values
 	fov = FollowCamera->FieldOfView;
@@ -85,6 +85,13 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	if (healthComp)
 	{
 		healthComp->OnKill.AddDynamic(this, &ADeathRocket_ProtoCharacter::OnDeath);
+	}
+
+	if (sprintComp)
+	{
+		sprintComp->OnDash.AddDynamic(this, &ADeathRocket_ProtoCharacter::Dash);
+		sprintComp->OnRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::Sprint);
+		sprintComp->OnEndRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::EndSprint);
 	}
 }
 
@@ -105,8 +112,8 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
 
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Sprint);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ADeathRocket_ProtoCharacter::StopSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, sprintComp, &USprintComponent::Sprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
@@ -131,8 +138,11 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 	}
 
+	// Sprint
 	if (GetCharacterMovement()->IsFalling())
-		GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetClampedToMaxSize(runningSpeed * 2.f);
+		GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetClampedToMaxSize(inAirMaxSpeed);
+
+	sprintComp->TickStamina(DeltaTime, isMoving);
 
 	// Camera
 	{ 
@@ -142,39 +152,6 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 
 		FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
 	} 
-
-	// Stamina
-	if (sprinting && isMoving)
-	{
-		float deltaConsumption = 0.f;
-		if (dashActivate && curSprintTime <= dashMaxTime)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = dashingSpeed;
-			deltaConsumption = consumptionSeconds * 2.f * DeltaTime;
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = runningSpeed;
-			deltaConsumption = consumptionSeconds * DeltaTime;
-		}
-		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString::SanitizeFloat(curFov));
-
-		curSprintTime += DeltaTime;
-		curStamina -= deltaConsumption;
-
-		if (curStamina <= 0.f)
-		{
-			staminaRecup = true;
-			StopSprint();
-		}
-	}
-	else
-	{
-		curStamina = FMath::Min(curStamina + recuperationSeconds * DeltaTime, maxStamina);
-		if (curStamina >= maxStamina)
-			staminaRecup = false;
-	}
-	staminaRatio = curStamina / maxStamina;
 
 	// Reload
 	if (reloading && isMoving)
@@ -311,7 +288,7 @@ void ADeathRocket_ProtoCharacter::Aim()
 {
 	if (reloading && curAmmo <= 0)
 		return;
-	StopSprint();
+	sprintComp->EndSprint();
 
 	curFov = ads;
 }
@@ -333,28 +310,22 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 
 void ADeathRocket_ProtoCharacter::Sprint()
 {
-	if (staminaRecup)
-		return;
-
 	StopAiming();
-
-	curSprintTime = dashRecovering ? dashMaxTime : 0.f;
 	curFov = runFov;
-	sprinting = true;
 
-	dashRecovering = true;
-	dashRecoveryTimer->Reset(this, &ADeathRocket_ProtoCharacter::RecoverDash);
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
-void ADeathRocket_ProtoCharacter::StopSprint()
+void ADeathRocket_ProtoCharacter::Dash()
 {
-	GetCharacterMovement()->MaxWalkSpeed = walkingSpeed;
-	curSprintTime = 0.f;
+	Sprint();
+
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
+}
+
+
+void ADeathRocket_ProtoCharacter::EndSprint()
+{
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 	curFov = fov;
-	sprinting = false;
-}
-
-void ADeathRocket_ProtoCharacter::RecoverDash()
-{
-	dashRecovering = false;
 }

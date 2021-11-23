@@ -89,38 +89,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float healthRatio = 1.f;
 
-	// SPRINT
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	bool dashActivate = true;
+	// SPECIAL
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float walkingSpeed = 600.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float runningSpeed = 800.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float dashingSpeed = 8000.f;
-
-	bool  sprinting = false;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float dashMaxTime = 0.05f;
-	float curSprintTime = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float dashRecoveryTime = 1.f;
-	bool dashRecovering = false;
-	class Timer* dashRecoveryTimer;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float maxStamina = 100.f;
-	float curStamina;
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	float staminaRatio = 1.f;
-	bool staminaRecup = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float consumptionSeconds = 40.f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float recuperationSeconds = 30.f;
+		float inAirMaxSpeed = 1600.f;
 
 	// AMMUNITION
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -141,10 +113,12 @@ protected:
 	UFUNCTION()
 	void OnDeath();
 
+	UFUNCTION()
 	void Sprint();
-	void StopSprint();
-	void RecoverDash();
-
+	UFUNCTION()
+	void Dash();
+	UFUNCTION()
+	void EndSprint();
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -153,6 +127,8 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* healthComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	class USprintComponent* sprintComp;
 
 	virtual void Tick(float DeltaTime) override;
 
