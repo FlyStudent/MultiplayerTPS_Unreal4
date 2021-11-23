@@ -43,7 +43,7 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-	void Jump();
+	void Jump() override;
 
 	void TurnAtRate(float Rate);
 	void LookUpAtRate(float Rate);
@@ -96,9 +96,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float walkingSpeed = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float runningSpeed = 1000.f;
+	float runningSpeed = 800.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-	float dashingSpeed = 10000.f;
+	float dashingSpeed = 8000.f;
 
 	bool  sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))

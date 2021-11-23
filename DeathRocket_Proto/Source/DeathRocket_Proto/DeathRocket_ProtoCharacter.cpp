@@ -131,6 +131,9 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 	}
 
+	if (GetCharacterMovement()->IsFalling())
+		GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetClampedToMaxSize(runningSpeed * 2.f);
+
 	// Camera
 	{ 
 		FVector actualCamLoc = FollowCamera->GetRelativeLocation();
@@ -144,10 +147,10 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	if (sprinting && isMoving)
 	{
 		float deltaConsumption = 0.f;
-		if (curSprintTime <= dashMaxTime && dashActivate)
+		if (dashActivate && curSprintTime <= dashMaxTime)
 		{
 			GetCharacterMovement()->MaxWalkSpeed = dashingSpeed;
-			deltaConsumption = consumptionSeconds * 1.5f * DeltaTime;
+			deltaConsumption = consumptionSeconds * 2.f * DeltaTime;
 		}
 		else
 		{
