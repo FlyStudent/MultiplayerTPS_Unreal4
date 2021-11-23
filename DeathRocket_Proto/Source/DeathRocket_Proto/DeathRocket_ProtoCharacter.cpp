@@ -74,7 +74,6 @@ ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
 {
 	delete fireTimer;
 	delete reloadTimer;
-	delete dashRecoveryTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
@@ -108,7 +107,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("ChangeCamSide", IE_Pressed, this, &ADeathRocket_ProtoCharacter::changeCamSide);
@@ -304,16 +303,16 @@ void ADeathRocket_ProtoCharacter::BroadcastUIUpdate()
 		lastReloadUpdate = false;
 	}
 
-	if (staminaRatio < 1.f)
-	{
-		OnStaminaUpdate.Broadcast(true);
-		lastStaminaUpdate = true;
-	}
-	else if (lastStaminaUpdate)
-	{
-		OnStaminaUpdate.Broadcast(false);
-		lastStaminaUpdate = false;
-	}
+	//if (staminaRatio < 1.f)
+	//{
+	//	OnStaminaUpdate.Broadcast(true);
+	//	lastStaminaUpdate = true;
+	//}
+	//else if (lastStaminaUpdate)
+	//{
+	//	OnStaminaUpdate.Broadcast(false);
+	//	lastStaminaUpdate = false;
+	//}
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()
