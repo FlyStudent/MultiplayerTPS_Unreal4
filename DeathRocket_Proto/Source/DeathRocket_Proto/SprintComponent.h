@@ -90,4 +90,5 @@ public:
 	FEndRunDelegate OnEndRun;
 
 	FORCEINLINE bool IsSprinting() const { return sprinting; }
+	FORCEINLINE float GetRatio() const { return staminaRatio; }
 };

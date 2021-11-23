@@ -33,9 +33,17 @@ void USprintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 {
+	// Stop Run/Dash if not moving
+	if (!isMoving && state != ESprintState::WALK)
+		GoToWalk();
+	// Come back to Run if moving 
+	else if (isMoving && sprinting && state == ESprintState::WALK)
+		GoToRun();
+
 	switch (state)
 	{
 	case ESprintState::RUN:
+
 		curSprintTime += DeltaTime;
 		curStamina -= runConsumptionSeconds * DeltaTime;
 
@@ -48,6 +56,7 @@ void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 		break;
 
 	case ESprintState::DASH:
+
 		curSprintTime += DeltaTime;
 		curStamina -= dashConsumptionSeconds * DeltaTime;
 
@@ -112,6 +121,7 @@ void USprintComponent::Sprint()
 
 void USprintComponent::EndSprint()
 {
+	sprinting = false;
 	GoToWalk();
 }
 
@@ -124,7 +134,6 @@ void USprintComponent::GoToWalk()
 {
 	state = ESprintState::WALK;
 	OnEndRun.Broadcast();
-	sprinting = false;
 }
 
 void USprintComponent::GoToRun()

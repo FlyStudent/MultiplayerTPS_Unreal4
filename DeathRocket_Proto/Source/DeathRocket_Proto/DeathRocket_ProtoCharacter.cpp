@@ -303,16 +303,16 @@ void ADeathRocket_ProtoCharacter::BroadcastUIUpdate()
 		lastReloadUpdate = false;
 	}
 
-	//if (staminaRatio < 1.f)
-	//{
-	//	OnStaminaUpdate.Broadcast(true);
-	//	lastStaminaUpdate = true;
-	//}
-	//else if (lastStaminaUpdate)
-	//{
-	//	OnStaminaUpdate.Broadcast(false);
-	//	lastStaminaUpdate = false;
-	//}
+	if (sprintComp->GetRatio() < 1.f)
+	{
+		OnStaminaUpdate.Broadcast(true);
+		lastStaminaUpdate = true;
+	}
+	else if (lastStaminaUpdate)
+	{
+		OnStaminaUpdate.Broadcast(false);
+		lastStaminaUpdate = false;
+	}
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()

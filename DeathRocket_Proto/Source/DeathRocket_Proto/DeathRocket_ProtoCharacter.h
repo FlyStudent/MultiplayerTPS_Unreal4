@@ -102,7 +102,7 @@ protected:
 		float inAirMaxSpeed = 1600.f;
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
-	FWidgetEvent OnStaminaUpdate;
+		FWidgetEvent OnStaminaUpdate;
 	bool lastStaminaUpdate = false;
 
 	// AMMUNITION
