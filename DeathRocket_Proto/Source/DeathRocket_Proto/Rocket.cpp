@@ -53,6 +53,7 @@ void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherA
     {
         Destroy();
 
+        OnExplosion.Broadcast();
 
         bool bIsImplemented = OtherActor->Implements<UDamageableInterface>(); // bIsImplemented will be true if OriginalObject implements UReactToTriggerInterfacce.
 
@@ -61,5 +62,6 @@ void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherA
             IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
             Damageable->OnDamage(1);
         }
+
     }
 }
