@@ -76,6 +76,7 @@ ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
 {
 	delete fireTimer;
 	delete reloadTimer;
+	delete gamepadUltimeTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
@@ -84,6 +85,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
+	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
 
 	// Setting values
 	fov = FollowCamera->FieldOfView;
@@ -116,6 +118,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
 	PlayerInputComponent->BindAction("Ultime", IE_Pressed, ultimeComp, &UUltimeLoaderComponent::Use);
+	PlayerInputComponent->BindAction("Gamepad Ultime", IE_Pressed, this, &ADeathRocket_ProtoCharacter::GamepadUltimeInput);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
@@ -153,13 +156,13 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	sprintComp->TickStamina(DeltaTime, isMoving);
 
 	// Camera
-	{ 
+	{
 		FVector actualCamLoc = FollowCamera->GetRelativeLocation();
 		FVector newSide = FMath::VInterpTo(actualCamLoc, { actualCamLoc.X, cameraYOffset * shoulder, actualCamLoc.Z }, DeltaTime, 10.f);
 		FollowCamera->SetRelativeLocation(newSide);
 
 		FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
-	} 
+	}
 
 	// Reload
 	if (reloading && isMoving)
@@ -271,6 +274,24 @@ void ADeathRocket_ProtoCharacter::EndReload()
 	OnAmmoUpdate.Broadcast();
 
 	reloading = false;
+}
+
+void ADeathRocket_ProtoCharacter::GamepadUltimeInput()
+{
+	if (gamepadUltimeUse)
+	{
+		ultimeComp->Use();
+	}
+	else
+	{
+		gamepadUltimeUse = true;
+		gamepadUltimeTimer->Reset(this, &ADeathRocket_ProtoCharacter::CancelGamepadUltimeInput);
+	}
+}
+
+void ADeathRocket_ProtoCharacter::CancelGamepadUltimeInput()
+{
+	gamepadUltimeUse = false;
 }
 
 void ADeathRocket_ProtoCharacter::UpdateTimersProgress()

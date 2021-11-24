@@ -56,9 +56,12 @@ protected:
 	float fireRate = 1.f;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float reloadTime = 5.f;
+	UPROPERTY(EditAnywhere, Category = Weapon)
+	float gamepadUltiInputTime = 0.1f;
 
 	class Timer* fireTimer;
 	class Timer* reloadTimer;
+	class Timer* gamepadUltimeTimer;
 	// for the UI
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float fireProgress = 0.f;
@@ -75,10 +78,17 @@ protected:
 	FWidgetEvent OnUltimeUpdate;
 	float lastUltimeRatio = 0.f;
 
+	bool gamepadUltimeUse = false;
+
 	void Fire();
 	void EndFire();
+
 	void Reload();
 	void EndReload();
+
+	void GamepadUltimeInput();
+	void CancelGamepadUltimeInput();
+
 	void UpdateTimersProgress();
 	void BroadcastUIUpdate();
 
