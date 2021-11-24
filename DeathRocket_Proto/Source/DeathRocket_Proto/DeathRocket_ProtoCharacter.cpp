@@ -257,7 +257,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FVector camLocWorld = FollowCamera->GetComponentLocation();
 
 	FRotator rotation = GetControlRotation();
-	SetActorRotation(rotation);
+	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 
 	FVector spawnLocation = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
 
@@ -266,19 +266,15 @@ void ADeathRocket_ProtoCharacter::Fire()
 	bool Hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), camLocWorld,  camLocWorld + camForward * 10000, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::None, HitObject, true, FColor::White, FColor::Red, 0.3f);
 	//UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), RocketLauncher->GetSocketLocation("RocketCanon"), HitObject.Location, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Persistent, HitObject2, true, FColor::Green, FColor::Red, 0.3f);
 	
-	ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams);
-
-	if (rocket && Hit)
+	if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
 	{
-		FVector RocketDir = HitObject.Location - spawnLocation;
+		FVector RocketDir = Hit ? HitObject.Location - spawnLocation : camForward;
+
 		RocketDir.Normalize();
 
 		rocket->Initialize(RocketDir);
 	}
-	else
-	{
-		rocket->Initialize(camForward);
-	}
+
 
 	firing = true;
 	--curAmmo;
