@@ -12,10 +12,16 @@ class DEATHROCKET_PROTO_API ARocket : public AActor
 private:
 
 	UPROPERTY(VisibleDefaultsOnly)
-	class USphereComponent* CollisionComp;
+	class USphereComponent* ProjectileColliderComp;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	class UBoxComponent* BoxColliderComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	class UProjectileMovementComponent* ProjectileMovement;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	class USphereComponent* HeadColliderComp;
 
 public:	
 	// Sets default values for this actor's properties
@@ -29,4 +35,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

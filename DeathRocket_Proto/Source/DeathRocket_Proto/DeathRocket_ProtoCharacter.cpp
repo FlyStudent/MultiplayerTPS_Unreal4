@@ -9,6 +9,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "Rocket.h"
 #include "Timer.h"
@@ -77,6 +78,9 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
 	dashRecoveryTimer = new Timer(GetWorld(), dashRecoveryTime);
+
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 
 	// Setting values
 	fov = FollowCamera->FieldOfView;
@@ -249,8 +253,20 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	FVector camLoc = FollowCamera->GetRelativeLocation();
+	FVector camLocWorld = FollowCamera->GetComponentLocation() + FollowCamera->GetForwardVector() * 350;
+	FVector camForward = FollowCamera->GetForwardVector();
 	FVector location = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
-	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
+
+	FHitResult HitObject;
+	FHitResult HitObject2;
+	bool Hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), camLocWorld,  camLocWorld + camForward * 10000, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Persistent, HitObject, true, FColor::White, FColor::Red, 0.3f);
+	UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), RocketLauncher->GetSocketLocation("RocketCanon"), HitObject.Location, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Persistent, HitObject2, true, FColor::Green, FColor::Red, 0.3f);
+	
+	FVector RocketDir = HitObject.Location - RocketLauncher->GetSocketLocation("RocketCanon");
+	if (Hit)
+	{
+		GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
+	}
 
 	firing = true;
 	--curAmmo;

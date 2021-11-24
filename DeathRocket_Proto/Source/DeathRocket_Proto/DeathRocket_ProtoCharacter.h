@@ -41,6 +41,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ARocket> rocketClass;
 
+	TArray<AActor*> ActorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Jump();
