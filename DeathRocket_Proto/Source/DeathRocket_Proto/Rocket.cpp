@@ -3,6 +3,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/BoxComponent.h"
+#include "DamageableInterface.h"
 
 // Sets default values
 ARocket::ARocket()
@@ -50,7 +51,15 @@ void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherA
 {
     if (OtherActor && OtherActor != this && OtherComp)
     {
-        
         Destroy();
+
+
+        bool bIsImplemented = OtherActor->Implements<UDamageableInterface>(); // bIsImplemented will be true if OriginalObject implements UReactToTriggerInterfacce.
+
+        if (bIsImplemented)
+        {
+            IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
+            Damageable->OnDamage(1);
+        }
     }
 }

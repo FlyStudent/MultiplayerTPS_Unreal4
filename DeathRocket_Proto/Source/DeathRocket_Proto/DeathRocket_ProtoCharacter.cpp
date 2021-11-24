@@ -336,7 +336,7 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 
 void ADeathRocket_ProtoCharacter::TakeDamage()
 {
-	healthComp->Hurt(1);
+	
 }
 
 void ADeathRocket_ProtoCharacter::OnDeath()
@@ -370,4 +370,9 @@ void ADeathRocket_ProtoCharacter::StopSprint()
 void ADeathRocket_ProtoCharacter::RecoverDash()
 {
 	dashRecovering = false;
+}
+
+void ADeathRocket_ProtoCharacter::OnDamage(int damage)
+{
+	healthComp->Hurt(1);
 }
