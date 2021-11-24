@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "Rocket.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRocketDelegate);
+
 UCLASS()
 class DEATHROCKET_PROTO_API ARocket : public AActor
 {
@@ -17,10 +19,10 @@ private:
 	UPROPERTY(VisibleDefaultsOnly)
 	class UBoxComponent* BoxColliderComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	class UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY(VisibleDefaultsOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* HeadColliderComp;
 
 public:	
@@ -32,6 +34,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	UPROPERTY(BlueprintAssignable, Category = "Components|Explosion")
+	FRocketDelegate OnExplosion;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

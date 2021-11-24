@@ -49,17 +49,21 @@ void ARocket::Tick(float DeltaTime)
 
 void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (OtherActor && OtherActor != this && OtherComp)
+    if (!OtherActor || OtherActor == this || !OtherComp)
     {
-        Destroy();
-
-
-        bool bIsImplemented = OtherActor->Implements<UDamageableInterface>(); // bIsImplemented will be true if OriginalObject implements UReactToTriggerInterfacce.
-
-        if (bIsImplemented)
-        {
-            IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
-            Damageable->OnDamage(1);
-        }
+        UE_LOG(LogTemp, Warning, TEXT("Cannot find actors and components"));
+        return;
     }
+
+    OnExplosion.Broadcast();
+
+    bool bIsImplemented = OtherActor->Implements<UDamageableInterface>(); // bIsImplemented will be true if OriginalObject implements UReactToTriggerInterfacce.
+
+    if (bIsImplemented)
+    {
+        IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
+        Damageable->OnDamage(1);
+    }
+
+    Destroy();
 }
