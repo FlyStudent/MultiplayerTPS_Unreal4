@@ -29,8 +29,11 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 		
+	UFUNCTION()
 	void Increase(float value);
+	UFUNCTION()
 	void IncreaseByKill();
+	UFUNCTION()
 	void IncreaseByCapture();
 
 	void SetUltime(class Ultime* ult);

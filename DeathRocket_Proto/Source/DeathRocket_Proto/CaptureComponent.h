@@ -4,7 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "CaptureComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCaptureDelegate)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FCaptureDelegate);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DEATHROCKET_PROTO_API UCaptureComponent : public UActorComponent
@@ -12,6 +12,8 @@ class DEATHROCKET_PROTO_API UCaptureComponent : public UActorComponent
 	GENERATED_BODY()
 
 private:	
+	UFUNCTION()
+		void BroadcastDelegate();
 
 protected:
 	virtual void BeginPlay() override;
@@ -20,15 +22,23 @@ protected:
 	bool isCapturing = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float captureTime = 10.f;
+		float captureTime = 6.f;
+
+	UFUNCTION()
+	void BeginAreaCapture();
 
 public:	
+
 	UCaptureComponent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	FORCEINLINE void SetCapturingArea(class ACaptureArea* area) { capturingArea = area; }
+
 	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void BeginOverlap(ACaptureArea* area);
+	UFUNCTION()
+	void EndOverlap(ACaptureArea* area);
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FCaptureDelegate OnCaptureCompleted;

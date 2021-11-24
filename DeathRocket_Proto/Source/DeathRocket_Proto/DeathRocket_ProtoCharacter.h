@@ -162,6 +162,8 @@ public:
 	class USprintComponent* sprintComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class UUltimeLoaderComponent* ultimeComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UCaptureComponent* captureComp;
 
 	virtual void Tick(float DeltaTime) override;
 

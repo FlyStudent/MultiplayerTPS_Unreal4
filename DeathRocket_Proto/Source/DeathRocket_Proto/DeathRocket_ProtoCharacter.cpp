@@ -13,6 +13,8 @@
 #include "HealthComponent.h"
 #include "SprintComponent.h"
 #include "UltimeLoaderComponent.h"
+#include "CaptureComponent.h"
+
 #include "Rocket.h"
 #include "Timer.h"
 
@@ -63,6 +65,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
 	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
+	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("CaptureComp"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -110,6 +113,11 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 		sprintComp->OnDash.AddDynamic(this, &ADeathRocket_ProtoCharacter::Dash);
 		sprintComp->OnRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::Sprint);
 		sprintComp->OnEndRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::EndSprint);
+	}
+
+	if (captureComp && ultimeComp)
+	{
+		captureComp->OnCaptureCompleted.AddDynamic(ultimeComp, &UUltimeLoaderComponent::IncreaseByCapture);
 	}
 }
 
