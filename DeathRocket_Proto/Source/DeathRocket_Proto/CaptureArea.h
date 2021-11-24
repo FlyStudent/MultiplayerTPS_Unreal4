@@ -23,6 +23,7 @@ private:
 protected:
 	virtual void BeginPlay() override;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float curPercent;
 	int tickFactor = 1;
 	class UCaptureComponent* capturingActor = nullptr;
@@ -47,4 +48,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FCaptureAreaDelegate OnCaptureCompleted;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FCaptureAreaDelegate OnCaptureProcess;
 };
