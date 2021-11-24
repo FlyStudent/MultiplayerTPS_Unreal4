@@ -9,10 +9,12 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
+#include "UltimeLoaderComponent.h"
+#include "SpawnManager.h"
 #include "HealthComponent.h"
 #include "SprintComponent.h"
-#include "UltimeLoaderComponent.h"
 #include "Rocket.h"
 #include "Timer.h"
 
@@ -111,6 +113,8 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 		sprintComp->OnRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::Sprint);
 		sprintComp->OnEndRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::EndSprint);
 	}
+
+	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -415,7 +419,21 @@ void ADeathRocket_ProtoCharacter::TakeDamage()
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
+	Respawn();
+}
 
+void ADeathRocket_ProtoCharacter::Respawn()
+{
+	healthComp->Reset();
+
+	if (spawnManager)
+	{
+		if (AController* controller = GetController())
+		{
+			if (APlayerController* playerController = Cast<APlayerController>(controller))
+				spawnManager->SpawnControllerAtPlayerStart(playerController);
+		}
+	}
 }
 
 void ADeathRocket_ProtoCharacter::Sprint()

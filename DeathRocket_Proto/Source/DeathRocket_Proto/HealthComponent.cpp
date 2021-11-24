@@ -1,5 +1,20 @@
 #include "HealthComponent.h"
 
+void UHealthComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    Reset();
+}
+
+void UHealthComponent::Reset()
+{
+    SetLife(maxLife);
+
+    isInvicible = false;
+    GetWorld()->GetTimerManager().ClearTimer(invicibleTimer);
+}
+
 void UHealthComponent::Hurt(int damage)
 {
     if (isInvicible)
@@ -28,8 +43,6 @@ void UHealthComponent::ResetInvicibility()
 
 void UHealthComponent::Kill()
 {
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Die!"));
-
     OnKill.Broadcast();
 }
 

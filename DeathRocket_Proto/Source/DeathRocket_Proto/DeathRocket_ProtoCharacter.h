@@ -144,6 +144,8 @@ protected:
 	UFUNCTION()
 	void OnDeath();
 
+	void Respawn();
+
 	UFUNCTION()
 	void Sprint();
 	UFUNCTION()
@@ -170,4 +172,5 @@ public:
 
 	void OnDamage(int damage) override;
 
+	class ASpawnManager* spawnManager;
 };

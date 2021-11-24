@@ -14,19 +14,6 @@ class ADeathRocket_ProtoGameMode : public AGameModeBase
 public:
 	ADeathRocket_ProtoGameMode();
 
-	UFUNCTION()
-	void OnSpawnPlayer(AGameModeBase* gamemode, APlayerController* controller);
-
-	void SpawnControllerAtPlayerStart(APlayerController* controller);
-
-private:
-	int lastPlayerStart = 0;
-
-	TArray<class APlayerStart*> playerStarts;
-	TArray<APlayerController*> controllers;
-
-protected:
-	virtual void StartPlay() override;
 };
 
 
