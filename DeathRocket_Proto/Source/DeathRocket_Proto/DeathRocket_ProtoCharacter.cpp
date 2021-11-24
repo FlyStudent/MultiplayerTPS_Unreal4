@@ -115,6 +115,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("ChangeCamSide", IE_Pressed, this, &ADeathRocket_ProtoCharacter::changeCamSide);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Fire);
+	PlayerInputComponent->BindAction("Ultime", IE_Pressed, ultimeComp, &UUltimeLoaderComponent::Use);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
@@ -315,6 +316,12 @@ void ADeathRocket_ProtoCharacter::BroadcastUIUpdate()
 		OnStaminaUpdate.Broadcast(false);
 		lastStaminaUpdate = false;
 	}
+
+	if (ultimeComp->GetRatio() != lastUltimeRatio)
+	{
+		OnUltimeUpdate.Broadcast(true);
+		lastUltimeRatio = ultimeComp->GetRatio();
+	}
 }
 
 void ADeathRocket_ProtoCharacter::changeCamSide()
@@ -360,7 +367,6 @@ void ADeathRocket_ProtoCharacter::Dash()
 
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
-
 
 void ADeathRocket_ProtoCharacter::EndSprint()
 {

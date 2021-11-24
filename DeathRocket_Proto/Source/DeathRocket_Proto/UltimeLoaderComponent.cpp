@@ -23,6 +23,8 @@ void UUltimeLoaderComponent::Increase(float value)
 {
 	curPercent = FMath::Min<float>(curPercent + value, 100.f);
 
+	ratio =  curPercent / 100.f;
+
 	if (curPercent == 100.f)
 		OnUltimeLoaded.Broadcast();
 }
@@ -44,11 +46,18 @@ void UUltimeLoaderComponent::SetUltime(Ultime* ult)
 
 void UUltimeLoaderComponent::Use()
 {
-	if (!ulti)
-		return;
+	//if (!ulti || curPercent != 100.f)
+	//	return;
 
-	ulti->Use();
+	if (curPercent != 100.f)
+	{
+		IncreaseByKill();
+		return;
+	}
+
+	//ulti->Use();
 	OnUltimeUsed.Broadcast();
+	curPercent = ratio = 0.f;
 }
 
 

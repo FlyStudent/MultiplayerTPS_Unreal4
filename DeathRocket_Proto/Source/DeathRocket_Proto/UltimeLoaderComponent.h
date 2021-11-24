@@ -15,6 +15,7 @@ class DEATHROCKET_PROTO_API UUltimeLoaderComponent : public UActorComponent
 protected:
 	virtual void BeginPlay() override;
 
+	float ratio;
 	float curPercent;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 		float killIncreaePercent = 15;
@@ -40,4 +41,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Ultime")
 	FUltimeUsed OnUltimeUsed;
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE float GetRatio() const { return ratio; }
 };

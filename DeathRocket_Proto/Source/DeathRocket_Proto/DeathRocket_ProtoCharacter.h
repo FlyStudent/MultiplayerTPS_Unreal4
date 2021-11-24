@@ -71,6 +71,9 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FWidgetEvent OnReloadCDUpdate;
 	bool lastReloadUpdate = false;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FWidgetEvent OnUltimeUpdate;
+	float lastUltimeRatio = 0.f;
 
 	void Fire();
 	void EndFire();
