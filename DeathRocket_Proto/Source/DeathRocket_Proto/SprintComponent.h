@@ -29,7 +29,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Speed", meta = (AllowPrivateAccess = "true"))
 		float runningSpeed = 800.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Speed", meta = (AllowPrivateAccess = "true"))
-		float dashingSpeed = 8000.f;
+		float dashingSpeed = 5000.f;
 
 	bool  sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Dash", meta = (AllowPrivateAccess = "true"))
@@ -37,7 +37,7 @@ protected:
 	float curSprintTime = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Dash", meta = (AllowPrivateAccess = "true"))
-		float dashRecoveryTime = 1.f;
+		float dashRecoveryTime = 0.1f;
 	bool dashRecovering = false;
 	class Timer* dashRecoveryTimer;
 
@@ -49,9 +49,9 @@ protected:
 	bool staminaRecup = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
-		float runConsumptionSeconds = 40.f;
+		float runConsumptionSeconds = 20.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
-		float dashConsumptionSeconds = 100.f;
+		float dashConsumptionSeconds = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
 		float recoverySeconds = 30.f;
 	

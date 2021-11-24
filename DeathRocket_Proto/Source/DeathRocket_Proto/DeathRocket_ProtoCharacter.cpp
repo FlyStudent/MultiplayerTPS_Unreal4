@@ -15,6 +15,8 @@
 #include "Rocket.h"
 #include "Timer.h"
 
+#define MAX_ACCELERATION 500000.f
+
 //////////////////////////////////////////////////////////////////////////
 // ADeathRocket_ProtoCharacter
 
@@ -37,7 +39,6 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// Configure character movement
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->GravityScale = 2.5f;
-	GetCharacterMovement()->MaxAcceleration = 100000.f;
 	GetCharacterMovement()->JumpZVelocity = 1300.f;
 	GetCharacterMovement()->AirControl = 0.3f;
 	GetCharacterMovement()->FallingLateralFriction = 0.5f;
@@ -87,6 +88,8 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	reloadTimer = new Timer(GetWorld(), reloadTime);
 	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
 
+	defaultMaxAcceleration = GetCharacterMovement()->MaxAcceleration;
+
 	// Setting values
 	fov = FollowCamera->FieldOfView;
 	curFov = fov;
@@ -121,7 +124,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Gamepad Ultime", IE_Pressed, this, &ADeathRocket_ProtoCharacter::GamepadUltimeInput);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
-	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::InputReload);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, sprintComp, &USprintComponent::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
@@ -189,10 +192,10 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
-	if (stopMovement && Value == 0.0f)
-		stopMovement = false;
+	if (stopMovementForward && Value == 0.0f)
+		stopMovementForward = false;
 
-	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovement)
+	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovementForward)
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -200,13 +203,17 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
 }
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
-	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovement)
+	if (stopMovementRight && Value == 0.0f)
+		stopMovementRight = false;
+
+	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovementRight)
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -258,14 +265,24 @@ void ADeathRocket_ProtoCharacter::EndFire()
 
 void ADeathRocket_ProtoCharacter::Reload()
 {
-	// Check if player is jumping
 	if (curAmmo == ammoMax || reloading)
 		return;
 
-	reloading = stopMovement = true;
+	reloading = true;
 	StopAiming();
 
 	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
+}
+
+void ADeathRocket_ProtoCharacter::InputReload()
+{
+	if (curAmmo == ammoMax || reloading)
+		return;
+
+	stopMovementForward = true;
+	stopMovementRight = true;
+
+	Reload();
 }
 
 void ADeathRocket_ProtoCharacter::EndReload()
@@ -379,13 +396,13 @@ void ADeathRocket_ProtoCharacter::Sprint()
 	StopAiming();
 	curFov = runFov;
 
+	GetCharacterMovement()->MaxAcceleration = defaultMaxAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
 void ADeathRocket_ProtoCharacter::Dash()
 {
-	Sprint();
-
+	GetCharacterMovement()->MaxAcceleration = MAX_ACCELERATION;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 

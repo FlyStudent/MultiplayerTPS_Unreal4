@@ -14,6 +14,8 @@ class ADeathRocket_ProtoCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	float defaultMaxAcceleration;
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -50,7 +52,8 @@ protected:
 	// FIRE AND RELOAD
 	bool firing = false;
 	bool reloading = false;
-	bool stopMovement = false;
+	bool stopMovementForward = false;
+	bool stopMovementRight = false;
 
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float fireRate = 1.f;
@@ -68,12 +71,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float reloadProgress = 0.f;
 
+	// UI UPDATE
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FWidgetEvent OnFireCDUpdate;
-	bool lastFireUpdate = false;
+	bool  lastFireUpdate = false;
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FWidgetEvent OnReloadCDUpdate;
-	bool lastReloadUpdate = false;
+	bool  lastReloadUpdate = false;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FWidgetEvent OnStaminaUpdate;
+	bool lastStaminaUpdate = false;
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FWidgetEvent OnUltimeUpdate;
 	float lastUltimeRatio = 0.f;
@@ -84,6 +91,7 @@ protected:
 	void EndFire();
 
 	void Reload();
+	void InputReload();
 	void EndReload();
 
 	void GamepadUltimeInput();
@@ -110,13 +118,8 @@ protected:
 	float healthRatio = 1.f;
 
 	// SPECIAL
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
-		float inAirMaxSpeed = 1600.f;
-
-	UPROPERTY(BlueprintAssignable, Category = Event)
-		FWidgetEvent OnStaminaUpdate;
-	bool lastStaminaUpdate = false;
+	float inAirMaxSpeed = 1600.f;
 
 	// AMMUNITION
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -153,7 +156,7 @@ public:
 	class UHealthComponent* healthComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	class USprintComponent* sprintComp;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class UUltimeLoaderComponent* ultimeComp;
 
 	virtual void Tick(float DeltaTime) override;
