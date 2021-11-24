@@ -276,7 +276,7 @@ void ADeathRocket_ProtoCharacter::Reload()
 
 void ADeathRocket_ProtoCharacter::InputReload()
 {
-	if (curAmmo == ammoMax || reloading)
+	if (curAmmo == ammoMax)
 		return;
 
 	stopMovementForward = true;
@@ -371,14 +371,17 @@ void ADeathRocket_ProtoCharacter::Aim()
 {
 	if (reloading && curAmmo <= 0)
 		return;
+
 	sprintComp->EndSprint();
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed() / 2.f;
 
 	curFov = ads;
 }
 
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
-	curFov = fov;
+	curFov = curFov == ads ? fov : curFov;
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
 void ADeathRocket_ProtoCharacter::TakeDamage()
@@ -408,6 +411,9 @@ void ADeathRocket_ProtoCharacter::Dash()
 
 void ADeathRocket_ProtoCharacter::EndSprint()
 {
-	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
+	if (curFov != runFov)
+		return;
+
 	curFov = fov;
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }

@@ -49,7 +49,9 @@ void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 
 		if (curStamina <= 0.f)
 		{
-			staminaRecup = true;
+			curStamina = 0.f;
+			staminaRecovering = true;
+			OnStaminaRecovery.Broadcast(staminaRecovering);
 			EndSprint();
 		}
 
@@ -67,8 +69,11 @@ void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 
 	default: // WALK
 		curStamina = FMath::Min(curStamina + recoverySeconds * DeltaTime, maxStamina);
-		if (curStamina >= maxStamina)
-			staminaRecup = false;
+		if (curStamina >= maxStamina && staminaRecovering)
+		{
+			staminaRecovering = false;
+			OnStaminaRecovery.Broadcast(staminaRecovering);
+		}
 
 		break;
 	}
@@ -95,7 +100,7 @@ float USprintComponent::GetSpeed() const
 
 bool USprintComponent::CanSprint() const
 {
-	return !staminaRecup;
+	return !staminaRecovering;
 }
 
 bool USprintComponent::CanDash() const

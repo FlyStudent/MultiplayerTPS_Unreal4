@@ -7,6 +7,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDashDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FRunDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FEndRunDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRecoverDelegate, bool, recovering);
 
 enum class ESprintState
 {
@@ -27,7 +28,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Speed", meta = (AllowPrivateAccess = "true"))
 		float walkingSpeed = 600.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Speed", meta = (AllowPrivateAccess = "true"))
-		float runningSpeed = 800.f;
+		float runningSpeed = 1000.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Speed", meta = (AllowPrivateAccess = "true"))
 		float dashingSpeed = 5000.f;
 
@@ -46,7 +47,7 @@ protected:
 	float curStamina;
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		float staminaRatio = 1.f;
-	bool staminaRecup = false;
+	bool staminaRecovering = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
 		float runConsumptionSeconds = 20.f;
@@ -81,13 +82,16 @@ public:
 	void EndSprint();
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Run")
-	FDashDelegate OnDash;
+		FDashDelegate OnDash;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Run")
-	FRunDelegate OnRun;
+		FRunDelegate OnRun;
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Run")
-	FEndRunDelegate OnEndRun;
+		FEndRunDelegate OnEndRun;
+
+	UPROPERTY(BlueprintAssignable, Category = "Components|Run")
+		FRecoverDelegate OnStaminaRecovery;
 
 	FORCEINLINE bool IsSprinting() const { return sprinting; }
 	FORCEINLINE float GetRatio() const { return staminaRatio; }
