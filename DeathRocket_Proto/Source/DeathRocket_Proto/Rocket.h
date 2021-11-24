@@ -29,6 +29,8 @@ public:
 	// Sets default values for this actor's properties
 	ARocket();
 
+	void Initialize(const FVector& direction);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

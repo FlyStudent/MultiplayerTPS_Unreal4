@@ -33,6 +33,13 @@ ARocket::ARocket()
     HeadColliderComp->BodyInstance.SetCollisionProfileName("OverlapAll");
     HeadColliderComp->OnComponentBeginOverlap.AddDynamic(this, &ARocket::OnOverlap);		// set up a notification for when this component hits something blocking
     HeadColliderComp->SetupAttachment(RootComponent);
+
+}
+
+void ARocket::Initialize(const FVector& direction)
+{
+    if (ProjectileMovement)
+        ProjectileMovement->Velocity = direction * ProjectileMovement->InitialSpeed;
 }
 
 // Called when the game starts or when spawned
