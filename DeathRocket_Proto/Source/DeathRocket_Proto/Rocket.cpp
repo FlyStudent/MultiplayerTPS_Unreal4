@@ -68,7 +68,7 @@ void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherA
     if (bIsImplemented)
     {
         IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
-        Damageable->OnDamage(1);
+        Damageable->OnDamage(rocketTeam, 1);
     }
 
     Destroy();

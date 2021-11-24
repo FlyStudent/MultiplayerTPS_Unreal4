@@ -25,6 +25,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* HeadColliderComp;
 
+	enum class EPlayerTeam rocketTeam;
+
 public:	
 	// Sets default values for this actor's properties
 	ARocket();

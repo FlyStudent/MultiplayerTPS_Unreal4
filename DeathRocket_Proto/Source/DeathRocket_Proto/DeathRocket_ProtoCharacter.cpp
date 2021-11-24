@@ -404,13 +404,9 @@ void ADeathRocket_ProtoCharacter::Aim()
 
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
+	//is player running? if yes -> fov is runFov
 	curFov = curFov == ads ? fov : curFov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
-}
-
-void ADeathRocket_ProtoCharacter::TakeDamage()
-{
-	
 }
 
 void ADeathRocket_ProtoCharacter::OnDeath()
@@ -435,14 +431,16 @@ void ADeathRocket_ProtoCharacter::Dash()
 
 void ADeathRocket_ProtoCharacter::EndSprint()
 {
-	if (curFov != runFov)
+	//is player aiming?
+	if (curFov == ads)
 		return;
 
 	curFov = fov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
-void ADeathRocket_ProtoCharacter::OnDamage(int damage)
+void ADeathRocket_ProtoCharacter::OnDamage(enum EPlayerTeam damagerTeam, int damage)
 {
-	healthComp->Hurt(1);
+	int dmg = damagerTeam == team ? damage / allyDmgReduction : damage;
+	healthComp->Hurt(dmg);
 }

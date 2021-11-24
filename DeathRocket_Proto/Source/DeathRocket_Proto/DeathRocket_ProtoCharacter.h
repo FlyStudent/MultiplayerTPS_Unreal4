@@ -47,6 +47,9 @@ protected:
 	TArray<AActor*> ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
+	enum class EPlayerTeam team;
+	float allyDmgReduction = 2.f;
+
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
@@ -139,8 +142,6 @@ protected:
 	void Aim();
 	void StopAiming();
 
-	void TakeDamage();
-
 	UFUNCTION()
 	void OnDeath();
 
@@ -168,6 +169,6 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void OnDamage(int damage) override;
+	void OnDamage(enum class EPlayerTeam damagerTeam, int damage) override;
 
 };
