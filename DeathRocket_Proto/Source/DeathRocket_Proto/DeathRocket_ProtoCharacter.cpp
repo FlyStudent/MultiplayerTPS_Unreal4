@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "HealthComponent.h"
 #include "SprintComponent.h"
@@ -66,6 +67,8 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
 
+	ActorsToIgnore.Add(this);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
 
@@ -87,6 +90,9 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
 	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
+
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 
 	defaultMaxAcceleration = GetCharacterMovement()->MaxAcceleration;
 
@@ -237,14 +243,31 @@ void ADeathRocket_ProtoCharacter::Fire()
 		reloadTimer->Clear();
 	}
 
+	FActorSpawnParameters spawnParams;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	FVector camForward = FollowCamera->GetForwardVector();
+	FVector camLocWorld = FollowCamera->GetComponentLocation();
+
 	FRotator rotation = GetControlRotation();
 	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 
-	FActorSpawnParameters spawnParams;
-	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	FVector camLoc = FollowCamera->GetRelativeLocation();
-	FVector location = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
-	GetWorld()->SpawnActor<ARocket>(rocketClass, location, GetControlRotation(), spawnParams);
+	FVector spawnLocation = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
+
+	FHitResult HitObject;
+	//FHitResult HitObject2;
+	bool Hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), camLocWorld,  camLocWorld + camForward * 10000, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::None, HitObject, true, FColor::White, FColor::Red, 0.3f);
+	//UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), RocketLauncher->GetSocketLocation("RocketCanon"), HitObject.Location, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Persistent, HitObject2, true, FColor::Green, FColor::Red, 0.3f);
+	
+	if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
+	{
+		FVector RocketDir = Hit ? HitObject.Location - spawnLocation : camForward;
+
+		RocketDir.Normalize();
+
+		rocket->Initialize(RocketDir);
+	}
+
 
 	firing = true;
 	--curAmmo;
@@ -256,6 +279,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 		return;
 	}
 	fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
+
 }
 
 void ADeathRocket_ProtoCharacter::EndFire()
@@ -386,7 +410,7 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 
 void ADeathRocket_ProtoCharacter::TakeDamage()
 {
-	healthComp->Hurt(1);
+	
 }
 
 void ADeathRocket_ProtoCharacter::OnDeath()
@@ -416,4 +440,9 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 
 	curFov = fov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
+}
+
+void ADeathRocket_ProtoCharacter::OnDamage(int damage)
+{
+	healthComp->Hurt(1);
 }

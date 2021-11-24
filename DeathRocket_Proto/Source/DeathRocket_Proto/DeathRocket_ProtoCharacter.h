@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "DamageableInterface.h"
 #include "DeathRocket_ProtoCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
 UCLASS(config=Game)
-class ADeathRocket_ProtoCharacter : public ACharacter
+class ADeathRocket_ProtoCharacter : public ACharacter, public IDamageableInterface
 {
 	GENERATED_BODY()
 
@@ -42,6 +43,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class ARocket> rocketClass;
+
+	TArray<AActor*> ActorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -163,4 +167,7 @@ public:
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	void OnDamage(int damage) override;
+
 };
