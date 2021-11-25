@@ -16,6 +16,7 @@
 #include "Rocket.h"
 #include "Timer.h"
 #include "PlayerTeam.h"
+#include "ScoreManager.h"
 
 #define MAX_ACCELERATION 500000.f
 
@@ -136,6 +137,9 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, sprintComp, &USprintComponent::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
+
+	PlayerInputComponent->BindAction("Scoreboard", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Score);
+	PlayerInputComponent->BindAction("Scoreboard", IE_Released, this, &ADeathRocket_ProtoCharacter::EndScore);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
@@ -447,6 +451,27 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 
 	curFov = fov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
+}
+
+void ADeathRocket_ProtoCharacter::Score()
+{
+	if (!sm)
+		return;
+
+	sm->DisplayScore(this);
+}
+
+void ADeathRocket_ProtoCharacter::EndScore()
+{
+	if (!sm)
+		return;
+
+	sm->HideScore(this);
+}
+
+int ADeathRocket_ProtoCharacter::GetKillsCount() const
+{
+	return kills;
 }
 
 void ADeathRocket_ProtoCharacter::OnDamage(ADeathRocket_ProtoCharacter* from, int damage)

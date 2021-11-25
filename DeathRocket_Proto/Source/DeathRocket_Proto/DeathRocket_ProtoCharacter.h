@@ -166,6 +166,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class UUltimeLoaderComponent* ultimeComp;
 
+	class AScoreManager* sm;
+	void Score();
+	void EndScore();
+	int GetKillsCount() const;
+
 	virtual void Tick(float DeltaTime) override;
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
