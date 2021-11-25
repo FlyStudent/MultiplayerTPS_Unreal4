@@ -68,7 +68,6 @@ protected:
 
 	class Timer* fireTimer;
 	class Timer* reloadTimer;
-	class Timer* gamepadUltimeTimer;
 	// for the UI
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float fireProgress = 0.f;
@@ -92,6 +91,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	float GetAreaDirectionAngle() const;
 
+	class Timer* gamepadUltimeTimer;
 	bool gamepadUltimeUse = false;
 
 	void Fire();

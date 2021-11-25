@@ -34,13 +34,18 @@ protected:
 
 	bool  sprinting = false;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Dash", meta = (AllowPrivateAccess = "true"))
-		float dashMaxTime = 0.05f;
+		float dashTime = 0.05f;
 	float curSprintTime = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Dash", meta = (AllowPrivateAccess = "true"))
 		float dashRecoveryTime = 0.1f;
 	bool dashRecovering = false;
 	class Timer* dashRecoveryTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Dash", meta = (AllowPrivateAccess = "true"))
+		float dashInputMaxTime = 0.25f;
+	bool processingDash = false;
+	class Timer* dashProcessTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
 		float maxStamina = 100.f;
@@ -52,14 +57,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
 		float runConsumptionSeconds = 20.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
-		float dashConsumptionSeconds = 600.f;
+		float dashConsumptionSeconds = 800.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Stamina", meta = (AllowPrivateAccess = "true"))
-		float recoverySeconds = 30.f;
+		float recoverySeconds = 15.f;
 	
 	virtual void BeginPlay() override;
 
+	void EndDashProcess();
 	void RecoverDash();
 
+	void CheckExhausting();
 	void GoToWalk();
 	void GoToRun();
 	void GoToDash();
