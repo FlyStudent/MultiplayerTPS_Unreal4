@@ -1,5 +1,7 @@
 #include "CaptureComponent.h"
 
+#include "Kismet/GameplayStatics.h"
+
 #include "CaptureArea.h"
 
 UCaptureComponent::UCaptureComponent()
@@ -7,10 +9,48 @@ UCaptureComponent::UCaptureComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
 void UCaptureComponent::BeginPlay()
 {
 	Super::BeginPlay();
+}
+
+FVector UCaptureComponent::GetAreaLocation() const
+{
+	if (AreaDetected())
+		return currentArea->GetActorLocation();
+
+	return FVector::ZeroVector;
+}
+
+void UCaptureComponent::AreaConnect()
+{
+	currentArea->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaDisconnect);
+	isEntered = true;
+
+	OnEnteringArea.Broadcast();
+}
+
+void UCaptureComponent::AreaDisconnect()
+{
+	if (AreaDetected())
+	{
+		currentArea->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
+		currentArea->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaDisconnect);
+		currentArea->ExitCaptureArea(this);
+
+		OnExitingArea.Broadcast();
+	}
+
+	isEntered = false;
+	isCapturing = false;
+
+	///GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Disconnect"));
+}
+
+void UCaptureComponent::AreaDestroyed()
+{
+	currentArea = nullptr;
+	OnAreaDestroyed.Broadcast();
 }
 
 void UCaptureComponent::AreaCapturedBySelf()
@@ -18,57 +58,63 @@ void UCaptureComponent::AreaCapturedBySelf()
 	OnCaptureCompleted.Broadcast();
 }
 
-void UCaptureComponent::AreaDisconnect()
-{
-	capturingArea->ExitCaptureArea(this);
-	isCapturing = false;
-}
-
-
 void UCaptureComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (capturingArea)
+	if (isEntered)
 	{
-
 		// Look if the capture area is free
 		float deltaCaptureTime = (DeltaTime * 100.f) / captureTime;
 
 		// Capture the area if nobody else doing
-		if (!isCapturing && capturingArea->TryCaptureArea(this))
+		if (!isCapturing && currentArea->TryCaptureArea(this))
 			BeginAreaCapture();
 		// Capture update
 		if (isCapturing)
-			capturingArea->TickCapturePercent(this, deltaCaptureTime);
+			currentArea->TickCapturePercent(this, deltaCaptureTime);
+	}
+	else if (!AreaDetected())
+	{
+		// TODO : optimize
+		SearchArea();
 	}
 }
 
 void UCaptureComponent::BeginAreaCapture()
 {
-	if (capturingArea)
+	if (AreaDetected())
 	{
-		capturingArea->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
+		currentArea->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
 		isCapturing = true;
 	}
 }
 
-void UCaptureComponent::BeginOverlap(ACaptureArea* area)
+void UCaptureComponent::SearchArea()
 {
-	if (area && !capturingArea)
+	currentArea = Cast<ACaptureArea>(UGameplayStatics::GetActorOfClass(GetWorld(), ACaptureArea::StaticClass()));
+	if (AreaDetected())
 	{
-		area->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaDisconnect);
-		if (area->TryCaptureArea(this))
+		OnAreaDetected.Broadcast();
+		currentArea->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaDestroyed);
+	}
+}
+
+void UCaptureComponent::BeginOverlap()
+{
+	if (!currentArea)
+		SearchArea();
+
+	if (currentArea && !isEntered)
+	{
+		AreaConnect();
+		if (currentArea->TryCaptureArea(this))
 			BeginAreaCapture();
 	}
 }
 
-void UCaptureComponent::EndOverlap(ACaptureArea* area)
+void UCaptureComponent::EndOverlap()
 {
-	if (area)
-	{
-		area->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
-		area->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaDisconnect);
+	if (AreaDetected())
 		AreaDisconnect();
-	}
 }

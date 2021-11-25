@@ -25,7 +25,6 @@ void ACaptureArea::BeginPlay()
 void ACaptureArea::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void ACaptureArea::TickCapturePercent(UCaptureComponent* actor, float deltaPercent)
@@ -56,7 +55,6 @@ bool ACaptureArea::TryCaptureArea(UCaptureComponent* actor)
 	if (!actor)
 		return false;
 
-	actor->SetCapturingArea(this);
 	if (!capturingActor)
 	{
 		capturingActor = actor;
@@ -70,8 +68,6 @@ bool ACaptureArea::TryCaptureArea(UCaptureComponent* actor)
 
 void ACaptureArea::ExitCaptureArea(UCaptureComponent* actor)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Free"));
-	actor->SetCapturingArea(nullptr);
 	if (actor == capturingActor)
 	{
 		capturingActor = nullptr;
@@ -93,11 +89,8 @@ void ACaptureArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 	auto captureComp = OtherActor->FindComponentByClass<UCaptureComponent>();
 
 	if (captureComp)
-	{
-
 		// Notify the Actor that he entered in the area
-		captureComp->BeginOverlap(this);
-	}
+		captureComp->BeginOverlap();
 }
 
 void ACaptureArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -108,8 +101,6 @@ void ACaptureArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor
 	auto captureComp = OtherActor->FindComponentByClass<UCaptureComponent>();
 
 	if (captureComp)
-	{
 		// Notify the Actor that he exits the area
-		captureComp->EndOverlap(this);
-	}
+		captureComp->EndOverlap();
 }

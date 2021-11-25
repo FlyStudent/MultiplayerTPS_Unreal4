@@ -12,15 +12,22 @@ class DEATHROCKET_PROTO_API UCaptureComponent : public UActorComponent
 	GENERATED_BODY()
 
 private:	
+
 	UFUNCTION()
 	void AreaCapturedBySelf();
 	UFUNCTION()
+	void AreaConnect();
+	UFUNCTION()
 	void AreaDisconnect();
+	UFUNCTION()
+	void AreaDestroyed();
 
 protected:
 	virtual void BeginPlay() override;
 
-	class ACaptureArea* capturingArea;
+
+	class ACaptureArea* currentArea;
+	bool isEntered = false;
 	bool isCapturing = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -28,6 +35,8 @@ protected:
 
 	UFUNCTION()
 	void BeginAreaCapture();
+	UFUNCTION()
+		void SearchArea();
 
 public:	
 
@@ -35,13 +44,25 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	FORCEINLINE void SetCapturingArea(class ACaptureArea* area) { capturingArea = area; }
+	UFUNCTION(BlueprintCallable)
+	FVector GetAreaLocation() const;
 
 	UFUNCTION()
-	void BeginOverlap(ACaptureArea* area);
+	void BeginOverlap();
 	UFUNCTION()
-	void EndOverlap(ACaptureArea* area);
+	void EndOverlap();
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
+	FCaptureDelegate OnAreaDetected;
+	UPROPERTY(BlueprintAssignable, Category = Event)
 	FCaptureDelegate OnCaptureCompleted;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FCaptureDelegate OnEnteringArea;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FCaptureDelegate OnExitingArea;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FCaptureDelegate OnAreaDestroyed;
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool AreaDetected() const { return currentArea != nullptr; }
 };

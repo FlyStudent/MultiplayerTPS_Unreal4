@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "HealthComponent.h"
 #include "SprintComponent.h"
@@ -65,7 +66,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
 	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
-	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("CaptureComp"));
+	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("AreaCaptureComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -153,6 +154,22 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADeathRocket_ProtoCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADeathRocket_ProtoCharacter::LookUpAtRate);
+}
+
+float ADeathRocket_ProtoCharacter::GetAreaDirectionAngle() const
+{
+	if (captureComp->AreaDetected())
+	{
+		FVector loc = GetActorLocation();
+		FVector areaLoc = captureComp->GetAreaLocation();
+
+		FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(loc, areaLoc);
+		FRotator rot = GetControlRotation();
+
+		return rot.Yaw - lookAt.Yaw;
+	}
+
+	return 0.f;
 }
 
 void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
