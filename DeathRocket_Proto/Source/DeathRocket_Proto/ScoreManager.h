@@ -13,7 +13,7 @@ class DEATHROCKET_PROTO_API AScoreManager : public AActor
 	GENERATED_BODY()
 
 private:
-	TMap<FString, int> globalScore;
+	TArray<class ADeathRocket_ProtoCharacter*> players;
 	
 public:	
 	// Sets default values for this actor's properties

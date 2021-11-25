@@ -20,7 +20,7 @@ void AScoreManager::Init()
 	for (AActor* actor : actors)
 	{
 		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
-		globalScore.Add(player->GetName(), player->GetKillsCount());
+		players.Add(player);
 
 		player->sm = this;
 	}
