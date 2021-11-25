@@ -24,7 +24,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool captured = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float curPercent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int tickFactor = 1;
 	class UCaptureComponent* capturingActor = nullptr;
 	class UCaptureComponent* previousCapturingActor = nullptr;
@@ -36,7 +39,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	float TickCapturePercent(UCaptureComponent* actor, float deltaPercent);
+	void TickCapturePercent(UCaptureComponent* actor, float deltaPercent);
 
 	bool TryCaptureArea(class UCaptureComponent* actor);
 	void ExitCaptureArea(class UCaptureComponent* actor);

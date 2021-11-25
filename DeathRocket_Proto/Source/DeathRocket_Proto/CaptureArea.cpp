@@ -19,7 +19,6 @@ void ACaptureArea::BeginPlay()
 
 	areaCollider->OnComponentBeginOverlap.AddDynamic(this, &ACaptureArea::OnOverlapBegin);
 	areaCollider->OnComponentEndOverlap.AddDynamic(this, &ACaptureArea::OnOverlapEnd);
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString("Create new capture"));
 }
 
 // Called every frame
@@ -29,8 +28,11 @@ void ACaptureArea::Tick(float DeltaTime)
 
 }
 
-float ACaptureArea::TickCapturePercent(UCaptureComponent* actor, float deltaPercent)
+void ACaptureArea::TickCapturePercent(UCaptureComponent* actor, float deltaPercent)
 {
+	if (captured)
+		return;
+
 	// If capture reset, begin true capture
 	if (tickFactor == -1 && (curPercent <= 0.f || actor == previousCapturingActor))
 		tickFactor = 1;
@@ -43,12 +45,10 @@ float ACaptureArea::TickCapturePercent(UCaptureComponent* actor, float deltaPerc
 	if (tickFactor == 1)
 		previousCapturingActor = actor;
 
-	if (curPercent >= 100.f)
-		AreaCaptured();
-
 	OnCaptureProcess.Broadcast();
 
-	return curPercent;
+	if (curPercent >= 100.f)
+		AreaCaptured();
 }
 
 bool ACaptureArea::TryCaptureArea(UCaptureComponent* actor)
@@ -70,25 +70,31 @@ bool ACaptureArea::TryCaptureArea(UCaptureComponent* actor)
 
 void ACaptureArea::ExitCaptureArea(UCaptureComponent* actor)
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Free"));
+	actor->SetCapturingArea(nullptr);
 	if (actor == capturingActor)
 	{
-		capturingActor->SetCapturingArea(nullptr);
 		capturingActor = nullptr;
 	}
 }
 
 void ACaptureArea::AreaCaptured()
 {
+	captured = true;
 	OnCaptureCompleted.Broadcast();
 	Destroy();
 }
 
 void ACaptureArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (captured)
+		return;
+
 	auto captureComp = OtherActor->FindComponentByClass<UCaptureComponent>();
 
 	if (captureComp)
 	{
+
 		// Notify the Actor that he entered in the area
 		captureComp->BeginOverlap(this);
 	}
@@ -96,6 +102,9 @@ void ACaptureArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 
 void ACaptureArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (captured)
+		return;
+
 	auto captureComp = OtherActor->FindComponentByClass<UCaptureComponent>();
 
 	if (captureComp)

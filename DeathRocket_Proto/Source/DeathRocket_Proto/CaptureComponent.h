@@ -13,7 +13,9 @@ class DEATHROCKET_PROTO_API UCaptureComponent : public UActorComponent
 
 private:	
 	UFUNCTION()
-		void BroadcastDelegate();
+	void AreaCapturedBySelf();
+	UFUNCTION()
+	void AreaDisconnect();
 
 protected:
 	virtual void BeginPlay() override;

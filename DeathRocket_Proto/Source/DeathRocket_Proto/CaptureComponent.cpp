@@ -13,9 +13,15 @@ void UCaptureComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UCaptureComponent::BroadcastDelegate()
+void UCaptureComponent::AreaCapturedBySelf()
 {
-	OnCaptureCompleted.Broadcast(); 
+	OnCaptureCompleted.Broadcast();
+}
+
+void UCaptureComponent::AreaDisconnect()
+{
+	capturingArea->ExitCaptureArea(this);
+	isCapturing = false;
 }
 
 
@@ -25,12 +31,14 @@ void UCaptureComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 	if (capturingArea)
 	{
+
 		// Look if the capture area is free
 		float deltaCaptureTime = (DeltaTime * 100.f) / captureTime;
 
+		// Capture the area if nobody else doing
 		if (!isCapturing && capturingArea->TryCaptureArea(this))
 			BeginAreaCapture();
-
+		// Capture update
 		if (isCapturing)
 			capturingArea->TickCapturePercent(this, deltaCaptureTime);
 	}
@@ -40,7 +48,7 @@ void UCaptureComponent::BeginAreaCapture()
 {
 	if (capturingArea)
 	{
-		capturingArea->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::BroadcastDelegate);
+		capturingArea->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
 		isCapturing = true;
 	}
 }
@@ -49,6 +57,7 @@ void UCaptureComponent::BeginOverlap(ACaptureArea* area)
 {
 	if (area && !capturingArea)
 	{
+		area->OnCaptureCompleted.AddDynamic(this, &UCaptureComponent::AreaDisconnect);
 		if (area->TryCaptureArea(this))
 			BeginAreaCapture();
 	}
@@ -58,8 +67,8 @@ void UCaptureComponent::EndOverlap(ACaptureArea* area)
 {
 	if (area)
 	{
-		area->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::BroadcastDelegate);
-		area->ExitCaptureArea(this);
-		isCapturing = false;
+		area->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
+		area->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaDisconnect);
+		AreaDisconnect();
 	}
 }
