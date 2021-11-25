@@ -9,12 +9,15 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
 #include "UltimeLoaderComponent.h"
 #include "SpawnManager.h"
 #include "HealthComponent.h"
 #include "SprintComponent.h"
+#include "CaptureComponent.h"
+
 #include "Rocket.h"
 #include "Timer.h"
 
@@ -65,6 +68,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
 	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
+	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("AreaCaptureComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -114,6 +118,11 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 		sprintComp->OnEndRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::EndSprint);
 	}
 
+	if (captureComp && ultimeComp)
+	{
+		captureComp->OnCaptureCompleted.AddDynamic(ultimeComp, &UUltimeLoaderComponent::IncreaseByCapture);
+	}
+	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
 }
 
@@ -149,6 +158,22 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADeathRocket_ProtoCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADeathRocket_ProtoCharacter::LookUpAtRate);
+}
+
+float ADeathRocket_ProtoCharacter::GetAreaDirectionAngle() const
+{
+	if (captureComp->AreaDetected())
+	{
+		FVector loc = GetActorLocation();
+		FVector areaLoc = captureComp->GetAreaLocation();
+
+		FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(loc, areaLoc);
+		FRotator rot = GetControlRotation();
+
+		return rot.Yaw - lookAt.Yaw;
+	}
+
+	return 0.f;
 }
 
 void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)

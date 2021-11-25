@@ -89,6 +89,9 @@ protected:
 	FWidgetEvent OnUltimeUpdate;
 	float lastUltimeRatio = 0.f;
 
+	UFUNCTION(BlueprintCallable)
+	float GetAreaDirectionAngle() const;
+
 	bool gamepadUltimeUse = false;
 
 	void Fire();
@@ -164,6 +167,8 @@ public:
 	class USprintComponent* sprintComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class UUltimeLoaderComponent* ultimeComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Capture, meta = (AllowPrivateAccess = "true"))
+	class UCaptureComponent* captureComp;
 
 	virtual void Tick(float DeltaTime) override;
 
