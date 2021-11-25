@@ -20,6 +20,7 @@
 
 #include "Rocket.h"
 #include "Timer.h"
+#include "PlayerTeam.h"
 
 #define MAX_ACCELERATION 500000.f
 
@@ -80,6 +81,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Setting values
 	curAmmo = ammoMax;
+	team = EPlayerTeam::BLUE;
 }
 
 ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
@@ -294,7 +296,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 		RocketDir.Normalize();
 
-		rocket->Initialize(RocketDir);
+		rocket->Initialize(RocketDir, this);
 	}
 
 
@@ -433,13 +435,9 @@ void ADeathRocket_ProtoCharacter::Aim()
 
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
+	//is player running? if yes -> fov is runFov
 	curFov = curFov == ads ? fov : curFov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
-}
-
-void ADeathRocket_ProtoCharacter::TakeDamage()
-{
-	
 }
 
 void ADeathRocket_ProtoCharacter::OnDeath()
@@ -478,14 +476,16 @@ void ADeathRocket_ProtoCharacter::Dash()
 
 void ADeathRocket_ProtoCharacter::EndSprint()
 {
-	if (curFov != runFov)
+	//is player aiming?
+	if (curFov == ads)
 		return;
 
 	curFov = fov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
-void ADeathRocket_ProtoCharacter::OnDamage(int damage)
+void ADeathRocket_ProtoCharacter::OnDamage(ADeathRocket_ProtoCharacter* from, int damage)
 {
-	healthComp->Hurt(1);
+	int dmg = from->team == team ? damage / allyDmgReduction : damage;
+	healthComp->Hurt(dmg);
 }

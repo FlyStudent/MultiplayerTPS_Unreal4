@@ -94,6 +94,10 @@ protected:
 
 	bool gamepadUltimeUse = false;
 
+	enum class EPlayerTeam team;
+	int allyDmgReduction = 2;
+	int kills = 0;
+
 	void Fire();
 	void EndFire();
 
@@ -142,8 +146,6 @@ protected:
 	void Aim();
 	void StopAiming();
 
-	void TakeDamage();
-
 	UFUNCTION()
 	void OnDeath();
 
@@ -175,7 +177,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void OnDamage(int damage) override;
+	void OnDamage(ADeathRocket_ProtoCharacter* from, int damage) override;
 
 	class ASpawnManager* spawnManager;
 };
