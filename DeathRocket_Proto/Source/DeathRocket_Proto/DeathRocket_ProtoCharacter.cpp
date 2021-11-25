@@ -413,7 +413,15 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
+	if (!lastDamager)
+		return;
 
+	if (lastDamager->team == team)
+		--lastDamager->kills;
+	else
+		++lastDamager->kills;
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"), lastDamager->kills));
 }
 
 void ADeathRocket_ProtoCharacter::Sprint()
@@ -443,6 +451,10 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 
 void ADeathRocket_ProtoCharacter::OnDamage(ADeathRocket_ProtoCharacter* from, int damage)
 {
-	int dmg = from->team == team ? damage / allyDmgReduction : damage;
+	int dmg = damage;
+	if (from->team == team)
+		dmg = damage / allyDmgReduction;
+
+	lastDamager = from;
 	healthComp->Hurt(dmg);
 }

@@ -92,6 +92,7 @@ protected:
 	bool gamepadUltimeUse = false;
 
 	enum class EPlayerTeam team;
+	ADeathRocket_ProtoCharacter* lastDamager = nullptr;
 	int allyDmgReduction = 2;
 	int kills = 0;
 
