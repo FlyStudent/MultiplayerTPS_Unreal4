@@ -25,13 +25,14 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* HeadColliderComp;
 
-	enum class EPlayerTeam rocketTeam;
+	//the player that shoots this rocket
+	class ADeathRocket_ProtoCharacter* shooter;
 
 public:	
 	// Sets default values for this actor's properties
 	ARocket();
 
-	void Initialize(const FVector& direction);
+	void Initialize(const FVector& direction, ADeathRocket_ProtoCharacter* shooter);
 
 protected:
 	// Called when the game starts or when spawned

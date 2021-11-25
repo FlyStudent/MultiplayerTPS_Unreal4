@@ -35,10 +35,13 @@ ARocket::ARocket()
 
 }
 
-void ARocket::Initialize(const FVector& direction)
+void ARocket::Initialize(const FVector& direction, ADeathRocket_ProtoCharacter* s)
 {
     if (ProjectileMovement)
+    {
         ProjectileMovement->Velocity = direction * ProjectileMovement->InitialSpeed;
+        shooter = s;
+    }
 }
 
 // Called when the game starts or when spawned
@@ -68,7 +71,7 @@ void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherA
     if (bIsImplemented)
     {
         IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
-        Damageable->OnDamage(rocketTeam, 1);
+        Damageable->OnDamage(shooter, 2);
     }
 
     Destroy();

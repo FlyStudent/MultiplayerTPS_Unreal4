@@ -15,6 +15,7 @@
 #include "UltimeLoaderComponent.h"
 #include "Rocket.h"
 #include "Timer.h"
+#include "PlayerTeam.h"
 
 #define MAX_ACCELERATION 500000.f
 
@@ -74,6 +75,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Setting values
 	curAmmo = ammoMax;
+	team = EPlayerTeam::BLUE;
 }
 
 ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
@@ -265,7 +267,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 		RocketDir.Normalize();
 
-		rocket->Initialize(RocketDir);
+		rocket->Initialize(RocketDir, this);
 	}
 
 
@@ -439,8 +441,8 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
-void ADeathRocket_ProtoCharacter::OnDamage(enum EPlayerTeam damagerTeam, int damage)
+void ADeathRocket_ProtoCharacter::OnDamage(ADeathRocket_ProtoCharacter* from, int damage)
 {
-	int dmg = damagerTeam == team ? damage / allyDmgReduction : damage;
+	int dmg = from->team == team ? damage / allyDmgReduction : damage;
 	healthComp->Hurt(dmg);
 }
