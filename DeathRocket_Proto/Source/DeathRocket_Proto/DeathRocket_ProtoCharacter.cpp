@@ -20,7 +20,6 @@
 
 #include "Rocket.h"
 #include "Timer.h"
-#include "PlayerTeam.h"
 #include "ScoreManager.h"
 
 #define MAX_ACCELERATION 500000.f
