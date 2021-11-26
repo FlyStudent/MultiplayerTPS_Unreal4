@@ -21,6 +21,7 @@
 #include "Rocket.h"
 #include "Timer.h"
 #include "PlayerTeam.h"
+#include "ScoreManager.h"
 
 #define MAX_ACCELERATION 500000.f
 
@@ -149,6 +150,9 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, sprintComp, &USprintComponent::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
+
+	PlayerInputComponent->BindAction("Scoreboard", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Score);
+	PlayerInputComponent->BindAction("Scoreboard", IE_Released, this, &ADeathRocket_ProtoCharacter::EndScore);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
@@ -459,6 +463,14 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
 	Respawn();
+
+	if (!lastDamager)
+		return;
+
+	if (lastDamager->team == team)
+		--lastDamager->kills;
+	else
+		++lastDamager->kills;
 }
 
 void ADeathRocket_ProtoCharacter::Respawn()
@@ -500,11 +512,36 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
+void ADeathRocket_ProtoCharacter::Score()
+{
+	if (!scoreManager)
+		return;
+
+	OnScoreDisplay.Broadcast();
+}
+
+void ADeathRocket_ProtoCharacter::EndScore()
+{
+	if (!scoreManager)
+		return;
+
+	OnScoreHide.Broadcast();
+}
+
+int ADeathRocket_ProtoCharacter::GetKillsCount() const
+{
+	return kills;
+}
+
 void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 {
 	if (ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(from))
 	{
-		int dmg = player->team == team ? damage / allyDmgReduction : damage;
+		int dmg = damage;
+		if (player->team == team)
+			dmg = damage / allyDmgReduction;
+
+		lastDamager = player;
 		healthComp->Hurt(dmg);
 	}
 }
