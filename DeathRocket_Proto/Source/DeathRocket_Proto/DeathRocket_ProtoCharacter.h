@@ -8,6 +8,7 @@
 #include "DeathRocket_ProtoCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScoreEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
 UENUM(BlueprintType)
@@ -108,6 +109,7 @@ protected:
 	bool gamepadUltimeUse = false;
 
 	enum class EPlayerTeam team;
+	ADeathRocket_ProtoCharacter* lastDamager = nullptr;
 	int allyDmgReduction = 2;
 	int kills = 0;
 
@@ -184,6 +186,19 @@ public:
 	class UUltimeLoaderComponent* ultimeComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Capture, meta = (AllowPrivateAccess = "true"))
 	class UCaptureComponent* captureComp;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class AScoreManager* scoreManager;
+
+	void Score();
+	void EndScore();
+	UFUNCTION(BlueprintCallable)
+	int  GetKillsCount() const;
+
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnScoreDisplay;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnScoreHide;
 
 	virtual void Tick(float DeltaTime) override;
 
