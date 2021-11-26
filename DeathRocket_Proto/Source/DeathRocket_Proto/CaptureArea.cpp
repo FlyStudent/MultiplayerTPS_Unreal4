@@ -33,7 +33,7 @@ void ACaptureArea::TickCapturePercent(const FColor& team, float deltaPercent)
 		return;
 
 	// If capture reset, begin true capture
-	if (tickFactor == -1.f && (curPercent <= 0.f || team == previousCapturingTeam))
+	if (tickFactor == -1.f * resetAreaSpeed && (curPercent <= 0.f || team == previousCapturingTeam))
 		tickFactor = 1.f;
 	// If previous capturer gone, need to reset capture
 	else if (tickFactor == 1.f && team != previousCapturingTeam)

@@ -82,7 +82,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Setting values
 	curAmmo = ammoMax;
-	team = EPlayerTeam::BLUE;
+	team = FColor::Blue;
 }
 
 ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
@@ -124,6 +124,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	if (captureComp && ultimeComp)
 	{
 		captureComp->OnCaptureCompleted.AddDynamic(ultimeComp, &UUltimeLoaderComponent::IncreaseByCapture);
+		captureComp->teamColor = team;
 	}
 	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
@@ -164,6 +165,14 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADeathRocket_ProtoCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADeathRocket_ProtoCharacter::LookUpAtRate);
+}
+
+void ADeathRocket_ProtoCharacter::SetTeamColor(const FColor& teamColor)
+{
+	team = teamColor;
+
+	if (captureComp)
+		captureComp->teamColor = teamColor;
 }
 
 float ADeathRocket_ProtoCharacter::GetAreaDirectionAngle() const
@@ -461,6 +470,7 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
+	KOs++;
 	Respawn();
 
 	if (!lastDamager)
@@ -475,11 +485,10 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 void ADeathRocket_ProtoCharacter::Respawn()
 {
 	healthComp->Reset();
-	EndReload();
 	sprintComp->EndRecover();
-	GetCharacterMovement()->StopMovementImmediately();
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Respawn"));
+	EndReload();
 
+	GetCharacterMovement()->StopMovementImmediately();
 
 	if (spawnManager)
 	{
@@ -531,11 +540,6 @@ void ADeathRocket_ProtoCharacter::EndScore()
 		return;
 
 	OnScoreHide.Broadcast();
-}
-
-int ADeathRocket_ProtoCharacter::GetKillsCount() const
-{
-	return kills;
 }
 
 void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)

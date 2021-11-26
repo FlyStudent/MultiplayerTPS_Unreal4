@@ -108,10 +108,15 @@ protected:
 	class Timer* gamepadUltimeTimer;
 	bool gamepadUltimeUse = false;
 
-	enum class EPlayerTeam team;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Team)
+	FColor team;
+	UFUNCTION(BlueprintCallable)
+	void SetTeamColor(const FColor& teamColor);
+
 	ADeathRocket_ProtoCharacter* lastDamager = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Team)
 	int allyDmgReduction = 2;
-	int kills = 0;
+	int kills = 0, KOs = 0;
 
 	void Fire();
 	void EndFire();
@@ -192,8 +197,6 @@ public:
 
 	void Score();
 	void EndScore();
-	UFUNCTION(BlueprintCallable)
-	int  GetKillsCount() const;
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FScoreEvent OnScoreDisplay;
@@ -204,6 +207,10 @@ public:
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int  GetKillsCount() const { return kills; };
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int  GetDeathsCount() const { return KOs; };
 
 	void OnDamage(AActor* from, int damage) override;
 
