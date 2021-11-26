@@ -32,17 +32,6 @@ void ADeathRocket_ProtoGameMode::StartPlay()
 	// Save them in memory
 	for (AActor* actor : actors)
 		playerStarts.Add(Cast<APlayerStart>(actor));
-	
-	// Initializing the score manager
-	TArray<AActor*> managers;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AScoreManager::StaticClass(), managers);
-
-	// There should be only one score manager
-	for (AActor* sm : managers)
-	{
-		AScoreManager* scoreManager = Cast<AScoreManager>(sm);
-		scoreManager->Init();
-	}
 }
 
 void ADeathRocket_ProtoGameMode::SpawnControllerAtPlayerStart(APlayerController* controller)
