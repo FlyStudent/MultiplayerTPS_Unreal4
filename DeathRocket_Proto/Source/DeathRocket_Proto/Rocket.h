@@ -12,6 +12,8 @@ class DEATHROCKET_PROTO_API ARocket : public AActor
 	GENERATED_BODY()
 	
 private:
+	TArray<AActor*> ActorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
 	UPROPERTY(VisibleDefaultsOnly)
 	class UBoxComponent* BoxColliderComp;
@@ -26,6 +28,27 @@ private:
 	class ADeathRocket_ProtoCharacter* shooter;
 
 public:	
+	UPROPERTY(EditAnywhere);
+	float selfDamageMultiplier = 0.25f;
+
+	UPROPERTY(EditAnywhere);
+	float selfLaunchForceMultiplier = 2.f;
+
+	UPROPERTY(EditAnywhere);
+	int damage = 25.f;
+
+	UPROPERTY(EditAnywhere);
+	int impulseForce = 500.f;
+
+	UPROPERTY(EditAnywhere);
+	int launchForce = 5.f;
+
+	UPROPERTY(EditAnywhere);
+	float damageRadius = 100.f;
+
+	UPROPERTY(EditAnywhere);
+	float distanceMultiplier = 1.f;
+
 	// Sets default values for this actor's properties
 	ARocket();
 

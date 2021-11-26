@@ -2,14 +2,17 @@
 
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Components/BoxComponent.h"
 #include "DamageableInterface.h"
+#include "DamageableInterface.h"
+#include "GameFramework/Character.h"
 
 // Sets default values
 ARocket::ARocket()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+    // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+    PrimaryActorTick.bCanEverTick = true;
 
     // set projectil collider
     HeadComp = CreateDefaultSubobject<USphereComponent>(TEXT("HeadCollider"));
@@ -40,13 +43,13 @@ void ARocket::Initialize(const FVector& direction)
 // Called when the game starts or when spawned
 void ARocket::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 }
 
 // Called every frame
 void ARocket::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 }
 
 void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
@@ -57,16 +60,56 @@ void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
         return;
     }
 
+    FVector position = GetActorLocation();
+
     OnExplosion.Broadcast();
 
-    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, OtherActor->GetName());
+    TArray<AActor*> overlappedActors;
+    UKismetSystemLibrary::SphereOverlapActors(GetWorld(), GetActorLocation(), damageRadius, ObjectTypes, AActor::StaticClass(), ActorsToIgnore, overlappedActors);
 
-    bool bIsImplemented = OtherActor->Implements<UDamageableInterface>(); // bIsImplemented will be true if OriginalObject implements UReactToTriggerInterfacce.
-
-    if (bIsImplemented)
+    for (AActor* overlappedActor : overlappedActors)
     {
-        IDamageableInterface* Damageable = Cast<IDamageableInterface>(OtherActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
-        Damageable->OnDamage(GetOwner(), 2);
+        if (overlappedActor == this)
+            continue;
+
+        FVector overlappedActorLocation = overlappedActor->GetActorLocation();
+        FVector difference = overlappedActorLocation - position;
+        float distance = difference.Size();
+        float oneOverDistance = 1.f / distance;
+
+        float power = distanceMultiplier  * oneOverDistance;
+
+        if (overlappedActor->Implements<UDamageableInterface>())
+        {
+            IDamageableInterface* Damageable = Cast<IDamageableInterface>(overlappedActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
+
+            int distanceDamage = power * (float)damage;
+
+            if (overlappedActor == GetOwner())
+                distanceDamage *= selfDamageMultiplier;
+
+            Damageable->OnDamage(GetOwner(), distanceDamage);
+        }
+
+        FVector direction = difference * oneOverDistance;
+
+        if (auto* physicComp = Cast<UPrimitiveComponent>(overlappedActor->GetComponentByClass(UPrimitiveComponent::StaticClass())))
+        {
+            FVector distanceImpulse = direction * impulseForce;
+
+            if (physicComp->IsSimulatingPhysics())
+                physicComp->AddImpulseAtLocation(distanceImpulse, overlappedActorLocation);
+        }
+        
+        if (auto* character = Cast<ACharacter>(overlappedActor))
+        {
+            FVector distanceLaunch = direction * launchForce;
+
+            if (overlappedActor == GetOwner())
+                distanceLaunch *= selfLaunchForceMultiplier;
+
+            character->LaunchCharacter(distanceLaunch, true, true);
+        }
     }
 
     Destroy();
