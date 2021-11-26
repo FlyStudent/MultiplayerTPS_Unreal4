@@ -69,7 +69,6 @@ protected:
 
 	class Timer* fireTimer;
 	class Timer* reloadTimer;
-	class Timer* gamepadUltimeTimer;
 	// for the UI
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	float fireProgress = 0.f;
@@ -90,6 +89,10 @@ protected:
 	FWidgetEvent OnUltimeUpdate;
 	float lastUltimeRatio = 0.f;
 
+	UFUNCTION(BlueprintCallable)
+	float GetAreaDirectionAngle() const;
+
+	class Timer* gamepadUltimeTimer;
 	bool gamepadUltimeUse = false;
 
 	enum class EPlayerTeam team;
@@ -148,6 +151,8 @@ protected:
 	UFUNCTION()
 	void OnDeath();
 
+	void Respawn();
+
 	UFUNCTION()
 	void Sprint();
 	UFUNCTION()
@@ -166,6 +171,8 @@ public:
 	class USprintComponent* sprintComp;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class UUltimeLoaderComponent* ultimeComp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Capture, meta = (AllowPrivateAccess = "true"))
+	class UCaptureComponent* captureComp;
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class AScoreManager* scoreManager;
@@ -185,6 +192,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void OnDamage(ADeathRocket_ProtoCharacter* from, int damage) override;
+	void OnDamage(AActor* from, int damage) override;
 
+	class ASpawnManager* spawnManager;
 };

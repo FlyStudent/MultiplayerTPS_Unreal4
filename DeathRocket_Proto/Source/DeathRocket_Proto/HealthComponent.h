@@ -41,7 +41,10 @@ public:
 
     void SetLife(int value);
 
-public:
+    void Reset();
+
+    virtual void BeginPlay() override;
+
     int GetLife() { return life; }
     int GetMaxLife() { return maxLife; }
 

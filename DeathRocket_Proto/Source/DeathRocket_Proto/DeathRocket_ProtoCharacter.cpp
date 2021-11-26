@@ -9,10 +9,15 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
+#include "UltimeLoaderComponent.h"
+#include "SpawnManager.h"
 #include "HealthComponent.h"
 #include "SprintComponent.h"
-#include "UltimeLoaderComponent.h"
+#include "CaptureComponent.h"
+
 #include "Rocket.h"
 #include "Timer.h"
 #include "PlayerTeam.h"
@@ -65,6 +70,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
 	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
+	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("AreaCaptureComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -114,6 +120,13 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 		sprintComp->OnRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::Sprint);
 		sprintComp->OnEndRun.AddDynamic(this, &ADeathRocket_ProtoCharacter::EndSprint);
 	}
+
+	if (captureComp && ultimeComp)
+	{
+		captureComp->OnCaptureCompleted.AddDynamic(ultimeComp, &UUltimeLoaderComponent::IncreaseByCapture);
+	}
+	
+	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -151,6 +164,22 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADeathRocket_ProtoCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADeathRocket_ProtoCharacter::LookUpAtRate);
+}
+
+float ADeathRocket_ProtoCharacter::GetAreaDirectionAngle() const
+{
+	if (captureComp->AreaDetected())
+	{
+		FVector loc = GetActorLocation();
+		FVector areaLoc = captureComp->GetAreaLocation();
+
+		FRotator lookAt = UKismetMathLibrary::FindLookAtRotation(loc, areaLoc);
+		FRotator rot = GetControlRotation();
+
+		return rot.Yaw - lookAt.Yaw;
+	}
+
+	return 0.f;
 }
 
 void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
@@ -251,6 +280,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	spawnParams.Owner = this;
 
 	FVector camForward = FollowCamera->GetForwardVector();
 	FVector camLocWorld = FollowCamera->GetComponentLocation();
@@ -271,7 +301,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 		RocketDir.Normalize();
 
-		rocket->Initialize(RocketDir, this);
+		rocket->Initialize(RocketDir);
 	}
 
 
@@ -417,6 +447,8 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
+	Respawn();
+
 	if (!lastDamager)
 		return;
 
@@ -424,8 +456,20 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 		--lastDamager->kills;
 	else
 		++lastDamager->kills;
+}
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("%d"), lastDamager->kills));
+void ADeathRocket_ProtoCharacter::Respawn()
+{
+	healthComp->Reset();
+
+	if (spawnManager)
+	{
+		if (AController* controller = GetController())
+		{
+			if (APlayerController* playerController = Cast<APlayerController>(controller))
+				spawnManager->SpawnControllerAtPlayerStart(playerController);
+		}
+	}
 }
 
 void ADeathRocket_ProtoCharacter::Sprint()
@@ -474,12 +518,15 @@ int ADeathRocket_ProtoCharacter::GetKillsCount() const
 	return kills;
 }
 
-void ADeathRocket_ProtoCharacter::OnDamage(ADeathRocket_ProtoCharacter* from, int damage)
+void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 {
-	int dmg = damage;
-	if (from->team == team)
-		dmg = damage / allyDmgReduction;
+	if (ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(from))
+	{
+		int dmg = damage;
+		if (player->team == team)
+			dmg = damage / allyDmgReduction;
 
-	lastDamager = from;
-	healthComp->Hurt(dmg);
+		lastDamager = player;
+		healthComp->Hurt(dmg);
+	}
 }

@@ -13,6 +13,7 @@ USprintComponent::USprintComponent()
 USprintComponent::~USprintComponent()
 {
 	delete dashRecoveryTimer;
+	delete dashProcessTimer;
 }
 
 
@@ -22,6 +23,7 @@ void USprintComponent::BeginPlay()
 	Super::BeginPlay();
 
 	dashRecoveryTimer = new Timer(GetWorld(), dashRecoveryTime);
+	dashProcessTimer = new Timer(GetWorld(), dashInputMaxTime);
 }
 
 
@@ -47,13 +49,7 @@ void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 		curSprintTime += DeltaTime;
 		curStamina -= runConsumptionSeconds * DeltaTime;
 
-		if (curStamina <= 0.f)
-		{
-			curStamina = 0.f;
-			staminaRecovering = true;
-			OnStaminaRecovery.Broadcast(staminaRecovering);
-			EndSprint();
-		}
+		CheckExhausting();
 
 		break;
 
@@ -62,8 +58,8 @@ void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 		curSprintTime += DeltaTime;
 		curStamina -= dashConsumptionSeconds * DeltaTime;
 
-		if (curSprintTime >= dashMaxTime)
-			GoToRun();
+		if (curSprintTime >= dashTime)
+			GoToWalk();
 
 		break;
 
@@ -113,21 +109,34 @@ void USprintComponent::Sprint()
 	if (!CanSprint())
 		return;
 
-	curSprintTime = 0.f;
-
 	if (CanDash())
-		GoToDash();
-	else
+	{
 		GoToRun();
+		processingDash = true;
+		dashProcessTimer->Reset(this, &USprintComponent::EndDashProcess);
+	}
+	else
+	{
+		GoToRun();
+	}
 
 	sprinting = true;
-
 }
 
 void USprintComponent::EndSprint()
 {
-	sprinting = false;
-	GoToWalk();
+	if (!sprinting)
+		return;
+
+	if (processingDash)
+		GoToDash();
+	else
+		GoToWalk();
+}
+
+void USprintComponent::EndDashProcess()
+{
+	processingDash = false;
 }
 
 void USprintComponent::RecoverDash()
@@ -135,23 +144,41 @@ void USprintComponent::RecoverDash()
 	dashRecovering = false;
 }
 
+void USprintComponent::CheckExhausting()
+{
+	if (curStamina <= 0.f)
+	{
+		curStamina = 0.1f;
+		staminaRecovering = true;
+		OnStaminaRecovery.Broadcast(staminaRecovering);
+		EndSprint();
+	}
+}
+
 void USprintComponent::GoToWalk()
 {
 	state = ESprintState::WALK;
+	sprinting = false;
+	CheckExhausting();
 	OnEndRun.Broadcast();
 }
 
 void USprintComponent::GoToRun()
 {
 	state = ESprintState::RUN;
+
+	curSprintTime = 0.f;
 	OnRun.Broadcast();
 }
 
 void USprintComponent::GoToDash()
 {
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Dash"));
 	state = ESprintState::DASH;
 	OnDash.Broadcast();
 
+
+	curSprintTime = 0.f;
 	dashRecovering = true;
 	dashRecoveryTimer->Reset(this, &USprintComponent::RecoverDash);
 }
