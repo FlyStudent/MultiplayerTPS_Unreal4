@@ -11,14 +11,17 @@ ARocket::ARocket()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    ProjectileColliderComp = CreateDefaultSubobject<USphereComponent>(TEXT("Projectile comp"));
-    ProjectileColliderComp->BodyInstance.SetCollisionProfileName("Projectile");
+    // set projectil collider
+    HeadComp = CreateDefaultSubobject<USphereComponent>(TEXT("HeadCollider"));
+    HeadComp->BodyInstance.SetCollisionProfileName("BlockAll");
+    HeadComp->OnComponentHit.AddDynamic(this, &ARocket::OnHit);		// set up a notification for when this component hits something blocking
+    HeadComp->SetupAttachment(RootComponent);
 
-    RootComponent = ProjectileColliderComp;
+    RootComponent = HeadComp;
 
     // Use a ProjectileMovementComponent to govern this projectile's movement
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Projectile movement component"));
-    ProjectileMovement->UpdatedComponent = ProjectileColliderComp;
+    ProjectileMovement->UpdatedComponent = RootComponent;
     ProjectileMovement->InitialSpeed = 2000.f;
     ProjectileMovement->MaxSpeed = 3000.f;
     ProjectileMovement->ProjectileGravityScale = 0.f;
@@ -26,13 +29,6 @@ ARocket::ARocket()
     BoxColliderComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Box collider"));
     BoxColliderComp->BodyInstance.SetCollisionProfileName("BlockAllDynamic");
     BoxColliderComp->SetupAttachment(RootComponent);
-
-    // set projectil collider
-    HeadColliderComp = CreateDefaultSubobject<USphereComponent>(TEXT("Head collider"));
-    HeadColliderComp->BodyInstance.SetCollisionProfileName("OverlapAll");
-    HeadColliderComp->OnComponentBeginOverlap.AddDynamic(this, &ARocket::OnOverlap);		// set up a notification for when this component hits something blocking
-    HeadColliderComp->SetupAttachment(RootComponent);
-
 }
 
 void ARocket::Initialize(const FVector& direction)
@@ -53,15 +49,17 @@ void ARocket::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ARocket::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (!OtherActor || OtherActor == this || !OtherComp)
+    if (!HitComponent || !OtherActor || OtherActor == this || !OtherComp)
     {
         UE_LOG(LogTemp, Warning, TEXT("Cannot find actors and components"));
         return;
     }
 
     OnExplosion.Broadcast();
+
+    GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, OtherActor->GetName());
 
     bool bIsImplemented = OtherActor->Implements<UDamageableInterface>(); // bIsImplemented will be true if OriginalObject implements UReactToTriggerInterfacce.
 

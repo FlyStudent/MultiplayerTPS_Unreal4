@@ -14,16 +14,13 @@ class DEATHROCKET_PROTO_API ARocket : public AActor
 private:
 
 	UPROPERTY(VisibleDefaultsOnly)
-	class USphereComponent* ProjectileColliderComp;
-
-	UPROPERTY(VisibleDefaultsOnly)
 	class UBoxComponent* BoxColliderComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	class UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	class USphereComponent* HeadColliderComp;
+	class USphereComponent* HeadComp;
 
 	//the player that shoots this rocket
 	class ADeathRocket_ProtoCharacter* shooter;
@@ -46,5 +43,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };
