@@ -10,6 +10,13 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
+UENUM(BlueprintType)
+enum class ERocketType : uint8 {
+	BASIC = 0 UMETA(DisplayName = "BASIC"),
+	BIG = 1 UMETA(DisplayName = "BIG"),
+	HEAD = 2 UMETA(DisplayName = "HEAD")
+};
+
 UCLASS(config=Game)
 class ADeathRocket_ProtoCharacter : public ACharacter, public IDamageableInterface
 {
@@ -41,8 +48,14 @@ public:
 	float BaseLookUpRate;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class ARocket> rocketClass;
+	UPROPERTY(EditDefaultsOnly, Category = Weapon)
+	TMap<ERocketType, TSubclassOf<class ARocket>> rocketClasses;
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	TArray<ERocketType> rocketAmmunitions;
+
+	UFUNCTION(BlueprintCallable)
+	void AddAmmunitions(int count, ERocketType type);
 
 	TArray<AActor*> ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
