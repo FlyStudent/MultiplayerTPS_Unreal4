@@ -31,7 +31,7 @@ protected:
 	bool isCapturing = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float captureTime = 6.f;
+		float captureTime = 10.f;
 
 	UFUNCTION()
 	void BeginAreaCapture();
@@ -42,7 +42,7 @@ protected:
 
 public:	
 
-	FColor teamColor;
+	FColor teamColor = FColor::Blue;
 
 	UCaptureComponent();
 

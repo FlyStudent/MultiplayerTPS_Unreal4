@@ -27,7 +27,10 @@ protected:
 	bool captured = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float curPercent;
-	int tickFactor = 1;
+
+	float tickFactor = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float resetAreaSpeed = 2.f;
 
 	TArray<FColor> capturingTeams;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
