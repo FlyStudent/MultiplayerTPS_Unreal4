@@ -177,7 +177,7 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void OnDamage(ADeathRocket_ProtoCharacter* from, int damage) override;
+	void OnDamage(AActor* from, int damage) override;
 
 	class ASpawnManager* spawnManager;
 };

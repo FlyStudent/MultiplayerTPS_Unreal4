@@ -276,6 +276,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 	FActorSpawnParameters spawnParams;
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	spawnParams.Owner = this;
 
 	FVector camForward = FollowCamera->GetForwardVector();
 	FVector camLocWorld = FollowCamera->GetComponentLocation();
@@ -296,7 +297,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 		RocketDir.Normalize();
 
-		rocket->Initialize(RocketDir, this);
+		rocket->Initialize(RocketDir);
 	}
 
 
@@ -484,8 +485,11 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 
-void ADeathRocket_ProtoCharacter::OnDamage(ADeathRocket_ProtoCharacter* from, int damage)
+void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 {
-	int dmg = from->team == team ? damage / allyDmgReduction : damage;
-	healthComp->Hurt(dmg);
+	if (ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(from))
+	{
+		int dmg = player->team == team ? damage / allyDmgReduction : damage;
+		healthComp->Hurt(dmg);
+	}
 }
