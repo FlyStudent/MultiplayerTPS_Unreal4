@@ -455,18 +455,18 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 
 void ADeathRocket_ProtoCharacter::Score()
 {
-	if (!sm)
+	if (!scoreManager)
 		return;
 
-	sm->DisplayScore(this);
+	OnScoreDisplay.Broadcast();
 }
 
 void ADeathRocket_ProtoCharacter::EndScore()
 {
-	if (!sm)
+	if (!scoreManager)
 		return;
 
-	sm->HideScore(this);
+	OnScoreHide.Broadcast();
 }
 
 int ADeathRocket_ProtoCharacter::GetKillsCount() const

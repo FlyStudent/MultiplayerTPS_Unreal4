@@ -19,27 +19,22 @@ void AScoreManager::Init()
 	// Save them in memory
 	for (AActor* actor : actors)
 	{
-		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
-		players.Add(player);
+		players.Add(actor);
 
-		player->sm = this;
+		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
+		player->scoreManager = this;
 	}
+}
+
+const TArray<AActor*>& AScoreManager::GetEveryPlayers() const
+{
+	return players;
 }
 
 // Called when the game starts or when spawned
 void AScoreManager::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void AScoreManager::DisplayScore(ADeathRocket_ProtoCharacter* query)
-{
-	OnDisplay.Broadcast(query->GetController());
-}
-
-void AScoreManager::HideScore(ADeathRocket_ProtoCharacter* query)
-{
-	OnHide.Broadcast(query->GetController());
 }
 
 // Called every frame

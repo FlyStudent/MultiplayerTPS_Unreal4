@@ -8,6 +8,7 @@
 #include "DeathRocket_ProtoCharacter.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScoreEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
 UCLASS(config=Game)
@@ -166,10 +167,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	class UUltimeLoaderComponent* ultimeComp;
 
-	class AScoreManager* sm;
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class AScoreManager* scoreManager;
+
 	void Score();
 	void EndScore();
-	int GetKillsCount() const;
+	UFUNCTION(BlueprintCallable)
+	int  GetKillsCount() const;
+
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnScoreDisplay;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnScoreHide;
 
 	virtual void Tick(float DeltaTime) override;
 

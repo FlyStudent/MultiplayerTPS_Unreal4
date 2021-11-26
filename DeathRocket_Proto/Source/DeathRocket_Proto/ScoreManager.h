@@ -5,15 +5,13 @@
 
 #include "ScoreManager.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FDisplayEvent, AController*, query);
-
 UCLASS()
 class DEATHROCKET_PROTO_API AScoreManager : public AActor
 {
 	GENERATED_BODY()
 
 private:
-	TArray<class ADeathRocket_ProtoCharacter*> players;
+	TArray<AActor*> players;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -21,14 +19,8 @@ public:
 
 	void Init();
 
-	void DisplayScore(class ADeathRocket_ProtoCharacter* query);
-	void HideScore(class ADeathRocket_ProtoCharacter* query);
-
-	UPROPERTY(BlueprintAssignable, Category = Event)
-	FDisplayEvent OnDisplay;
-
-	UPROPERTY(BlueprintAssignable, Category = Event)
-	FDisplayEvent OnHide;
+	UFUNCTION(BlueprintCallable)
+	const TArray<AActor*>& GetEveryPlayers() const;
 
 protected:
 	// Called when the game starts or when spawned
