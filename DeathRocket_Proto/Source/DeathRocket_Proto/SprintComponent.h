@@ -77,7 +77,6 @@ public:
 	USprintComponent();
 	~USprintComponent();
 
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void TickStamina(float DeltaTime, bool isMoving);
 
 	float GetSpeed(const ESprintState& state) const;
@@ -87,6 +86,7 @@ public:
 	bool CanDash() const;
 	void Sprint();
 	void EndSprint();
+	void EndRecover();
 
 	UPROPERTY(BlueprintAssignable, Category = "Components|Run")
 		FDashDelegate OnDash;

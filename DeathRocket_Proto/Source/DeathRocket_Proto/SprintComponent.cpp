@@ -27,12 +27,6 @@ void USprintComponent::BeginPlay()
 }
 
 
-// Called every frame
-void USprintComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
 void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 {
 	// Stop Run/Dash if not moving
@@ -64,12 +58,10 @@ void USprintComponent::TickStamina(float DeltaTime, bool isMoving)
 		break;
 
 	default: // WALK
+
 		curStamina = FMath::Min(curStamina + recoverySeconds * DeltaTime, maxStamina);
 		if (curStamina >= maxStamina && staminaRecovering)
-		{
-			staminaRecovering = false;
-			OnStaminaRecovery.Broadcast(staminaRecovering);
-		}
+			EndRecover();
 
 		break;
 	}
@@ -132,6 +124,13 @@ void USprintComponent::EndSprint()
 		GoToDash();
 	else
 		GoToWalk();
+}
+
+void USprintComponent::EndRecover()
+{
+	curStamina = maxStamina;
+	staminaRecovering = false;
+	OnStaminaRecovery.Broadcast(staminaRecovering);
 }
 
 void USprintComponent::EndDashProcess()

@@ -27,22 +27,22 @@ void ACaptureArea::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ACaptureArea::TickCapturePercent(UCaptureComponent* actor, float deltaPercent)
+void ACaptureArea::TickCapturePercent(const FColor& team, float deltaPercent)
 {
 	if (captured)
 		return;
 
 	// If capture reset, begin true capture
-	if (tickFactor == -1 && (curPercent <= 0.f || actor == previousCapturingActor))
+	if (tickFactor == -1 && (curPercent <= 0.f || team == previousCapturingTeam))
 		tickFactor = 1;
 	// If previous capturer gone, need to reset capture
-	else if (tickFactor == 1 && actor != previousCapturingActor)
+	else if (tickFactor == 1 && team != previousCapturingTeam)
 		tickFactor = -1;
 
 	curPercent += deltaPercent * tickFactor;
 
 	if (tickFactor == 1)
-		previousCapturingActor = actor;
+		previousCapturingTeam = team;
 
 	OnCaptureProcess.Broadcast();
 
@@ -50,28 +50,15 @@ void ACaptureArea::TickCapturePercent(UCaptureComponent* actor, float deltaPerce
 		AreaCaptured();
 }
 
-bool ACaptureArea::TryCaptureArea(UCaptureComponent* actor)
+bool ACaptureArea::TryCaptureArea(const FColor& team)
 {
-	if (!actor)
-		return false;
+	for (auto capturingTeam : capturingTeams)
+	{
+		if (capturingTeam != team)
+			return false;
+	}
 
-	if (!capturingActor)
-	{
-		capturingActor = actor;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-void ACaptureArea::ExitCaptureArea(UCaptureComponent* actor)
-{
-	if (actor == capturingActor)
-	{
-		capturingActor = nullptr;
-	}
+	return true;
 }
 
 void ACaptureArea::AreaCaptured()
@@ -89,8 +76,12 @@ void ACaptureArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 	auto captureComp = OtherActor->FindComponentByClass<UCaptureComponent>();
 
 	if (captureComp)
+	{
 		// Notify the Actor that he entered in the area
 		captureComp->BeginOverlap();
+
+		capturingTeams.Add(captureComp->teamColor);
+	}
 }
 
 void ACaptureArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -101,6 +92,9 @@ void ACaptureArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor
 	auto captureComp = OtherActor->FindComponentByClass<UCaptureComponent>();
 
 	if (captureComp)
+	{
 		// Notify the Actor that he exits the area
+		capturingTeams.RemoveSingle(captureComp->teamColor);
 		captureComp->EndOverlap();
+	}
 }

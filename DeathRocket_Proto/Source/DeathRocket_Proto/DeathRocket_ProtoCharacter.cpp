@@ -216,7 +216,6 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 
 	UpdateTimersProgress();
 	BroadcastUIUpdate();
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Move"));
 }
 
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
@@ -476,6 +475,11 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 void ADeathRocket_ProtoCharacter::Respawn()
 {
 	healthComp->Reset();
+	EndReload();
+	sprintComp->EndRecover();
+	GetCharacterMovement()->StopMovementImmediately();
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Respawn"));
+
 
 	if (spawnManager)
 	{
@@ -509,6 +513,7 @@ void ADeathRocket_ProtoCharacter::EndSprint()
 		return;
 
 	curFov = fov;
+	GetCharacterMovement()->MaxAcceleration = defaultMaxAcceleration;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 }
 

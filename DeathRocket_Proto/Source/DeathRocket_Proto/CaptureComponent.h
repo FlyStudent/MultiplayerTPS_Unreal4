@@ -36,9 +36,13 @@ protected:
 	UFUNCTION()
 	void BeginAreaCapture();
 	UFUNCTION()
-		void SearchArea();
+	void StopAreaCapture();
+	UFUNCTION()
+	void SearchArea();
 
 public:	
+
+	FColor teamColor;
 
 	UCaptureComponent();
 

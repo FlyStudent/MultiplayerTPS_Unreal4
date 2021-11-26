@@ -27,22 +27,21 @@ protected:
 	bool captured = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float curPercent;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int tickFactor = 1;
-	class UCaptureComponent* capturingActor = nullptr;
-	class UCaptureComponent* previousCapturingActor = nullptr;
+
+	TArray<FColor> capturingTeams;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FColor previousCapturingTeam = FColor::Blue;
 
 public:	
-
 
 	ACaptureArea();
 
 	virtual void Tick(float DeltaTime) override;
 
-	void TickCapturePercent(UCaptureComponent* actor, float deltaPercent);
+	void TickCapturePercent(const FColor& team, float deltaPercent);
 
-	bool TryCaptureArea(class UCaptureComponent* actor);
-	void ExitCaptureArea(class UCaptureComponent* actor);
+	bool TryCaptureArea(const FColor& team);
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
