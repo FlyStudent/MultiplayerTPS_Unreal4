@@ -131,6 +131,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	if (ultimeComp)
 	{
 		ultimeComp->OnUltimeUsed.AddDynamic(this, &ADeathRocket_ProtoCharacter::CreateDefaultUltime);
+		CreateDefaultUltime();
 	}
 	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
@@ -281,10 +282,18 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 	}
 }
 
-void ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count)
+void ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool setToHead)
 {
-	for (int i = 0; i < count; i++)
-		rocketAmmunitions.Add(type);
+	if (!setToHead)
+	{
+		for (int i = 0; i < count; i++)
+			rocketAmmunitions.Add(type);
+	}
+	else
+	{
+		for (int i = 0; i < count; i++)
+			rocketAmmunitions.Insert(type, 0);
+	}
 }
 
 void ADeathRocket_ProtoCharacter::Fire()
@@ -315,6 +324,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	bool Hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), camLocWorld,  camLocWorld + camForward * 10000, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::None, HitObject, true, FColor::White, FColor::Red, 0.3f);
 	//UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), RocketLauncher->GetSocketLocation("RocketCanon"), HitObject.Location, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Persistent, HitObject2, true, FColor::Green, FColor::Red, 0.3f);
 	
+	// Spawn rocket according to first ammunition's type, else default type
 	TSubclassOf<class ARocket> rocketClass;
 	if (rocketAmmunitions.Num() != 0)
 	{
@@ -332,11 +342,17 @@ void ADeathRocket_ProtoCharacter::Fire()
 
 		rocket->Initialize(RocketDir);
 	}
-
-
+	// Cancel forced aim (used for ultime)
+	if (aimForced)
+	{
+		aimForced = false;
+		StopAiming();
+	}
+	// Variable things...
 	firing = true;
 	--curAmmo;
 	OnAmmoUpdate.Broadcast();
+	// Reload
 	if (curAmmo == 0)
 	{
 		EndFire();
@@ -354,7 +370,9 @@ void ADeathRocket_ProtoCharacter::EndFire()
 
 void ADeathRocket_ProtoCharacter::CreateDefaultUltime()
 {
-	ultimeComp->SetUltime(new Ultime());
+	GEngine->AddOnScreenDebugMessage(-1, 1.f, team, FString("Create"));
+	Ultime* ultime = new Ultime();
+	ultimeComp->SetUltime(ultime);
 }
 
 
@@ -386,6 +404,11 @@ void ADeathRocket_ProtoCharacter::EndReload()
 	OnAmmoUpdate.Broadcast();
 
 	reloading = false;
+}
+
+void ADeathRocket_ProtoCharacter::ForceReload()
+{
+	EndReload();
 }
 
 void ADeathRocket_ProtoCharacter::GamepadUltimeInput()
@@ -475,10 +498,21 @@ void ADeathRocket_ProtoCharacter::Aim()
 
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
+	if (aimForced)
+		return;
+
 	//is player running? if yes -> fov is runFov
 	curFov = curFov == ads ? fov : curFov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
+	aimForced = false;
 }
+
+void ADeathRocket_ProtoCharacter::ForceAim()
+{
+	aimForced = true;
+	Aim();
+}
+
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {

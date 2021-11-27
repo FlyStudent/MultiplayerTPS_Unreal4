@@ -47,14 +47,16 @@ void UUltimeLoaderComponent::SetUltime(Ultime* ult)
 
 void UUltimeLoaderComponent::Use()
 {
-	if (!ulti || curPercent != 100.f)
+	if (!ulti || curPercent < 100.f)
 		return;
 
 	ulti->Use(Cast<ADeathRocket_ProtoCharacter>(GetOwner()));
+	// Reset variables
 	delete ulti;
-
-	OnUltimeUsed.Broadcast();
+	ulti = nullptr;
 	curPercent = ratio = 0.f;
+	// Broadcast
+	OnUltimeUsed.Broadcast();
 }
 
 

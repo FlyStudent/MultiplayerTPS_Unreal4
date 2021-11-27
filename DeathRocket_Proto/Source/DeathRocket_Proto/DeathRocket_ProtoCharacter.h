@@ -118,6 +118,7 @@ protected:
 	void Fire();
 	void EndFire();
 
+	UFUNCTION()
 	void CreateDefaultUltime();
 
 	void Reload();
@@ -134,6 +135,8 @@ protected:
 	int   shoulder = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float cameraYOffset = 30.f;
+
+	bool aimForced = false;
 	// Aim Down Sight (when aiming)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	float ads = 50.f;
@@ -201,11 +204,16 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION (BlueprintCallable)
+	void ForceAim();
+	UFUNCTION(BlueprintCallable)
+	void ForceReload();
+
 	void Score();
 	void EndScore();
 
 	UFUNCTION(BlueprintCallable)
-	void AddAmmunitions(ERocketType type, int count = 1);
+	void AddAmmunitions(ERocketType type, int count = 1, bool setToHead = false);
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
