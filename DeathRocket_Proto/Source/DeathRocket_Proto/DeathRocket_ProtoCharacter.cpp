@@ -19,6 +19,7 @@
 #include "CaptureComponent.h"
 
 #include "Rocket.h"
+#include "Ultime.h"
 #include "Timer.h"
 #include "ScoreManager.h"
 
@@ -122,8 +123,14 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 
 	if (captureComp && ultimeComp)
 	{
-		captureComp->OnCaptureCompleted.AddDynamic(ultimeComp, &UUltimeLoaderComponent::IncreaseByCapture);
 		captureComp->teamColor = team;
+		if (ultimeComp)
+			captureComp->OnCaptureCompleted.AddDynamic(ultimeComp, &UUltimeLoaderComponent::IncreaseByCapture);
+	}
+
+	if (ultimeComp)
+	{
+		ultimeComp->OnUltimeUsed.AddDynamic(this, &ADeathRocket_ProtoCharacter::CreateDefaultUltime);
 	}
 	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
@@ -274,7 +281,7 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 	}
 }
 
-void ADeathRocket_ProtoCharacter::AddAmmunitions(int count, ERocketType type)
+void ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count)
 {
 	for (int i = 0; i < count; i++)
 		rocketAmmunitions.Add(type);
@@ -344,6 +351,12 @@ void ADeathRocket_ProtoCharacter::EndFire()
 {
 	firing = false;
 }
+
+void ADeathRocket_ProtoCharacter::CreateDefaultUltime()
+{
+	ultimeComp->SetUltime(new Ultime());
+}
+
 
 void ADeathRocket_ProtoCharacter::Reload()
 {
@@ -476,9 +489,14 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 		return;
 
 	if (lastDamager->team == team)
+	{
 		--lastDamager->kills;
+	}
 	else
+	{
 		++lastDamager->kills;
+		lastDamager->ultimeComp->IncreaseByKill();
+	}
 }
 
 void ADeathRocket_ProtoCharacter::Respawn()

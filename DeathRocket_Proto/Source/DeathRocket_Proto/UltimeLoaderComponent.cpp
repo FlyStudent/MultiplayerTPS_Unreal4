@@ -1,5 +1,6 @@
 #include "UltimeLoaderComponent.h"
 
+#include "DeathRocket_ProtoCharacter.h"
 #include "Ultime.h"
 
 // Sets default values for this component's properties
@@ -46,16 +47,12 @@ void UUltimeLoaderComponent::SetUltime(Ultime* ult)
 
 void UUltimeLoaderComponent::Use()
 {
-	//if (!ulti || curPercent != 100.f)
-	//	return;
-
-	if (curPercent != 100.f)
-	{
-		IncreaseByKill();
+	if (!ulti || curPercent != 100.f)
 		return;
-	}
 
-	//ulti->Use();
+	ulti->Use(Cast<ADeathRocket_ProtoCharacter>(GetOwner()));
+	delete ulti;
+
 	OnUltimeUsed.Broadcast();
 	curPercent = ratio = 0.f;
 }

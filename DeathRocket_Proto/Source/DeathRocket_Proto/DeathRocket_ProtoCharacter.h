@@ -55,9 +55,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	TArray<ERocketType> rocketAmmunitions;
 
-	UFUNCTION(BlueprintCallable)
-	void AddAmmunitions(int count, ERocketType type);
-
 	TArray<AActor*> ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
@@ -120,6 +117,8 @@ protected:
 
 	void Fire();
 	void EndFire();
+
+	void CreateDefaultUltime();
 
 	void Reload();
 	void InputReload();
@@ -195,15 +194,18 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class AScoreManager* scoreManager;
 
-	void Score();
-	void EndScore();
-
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FScoreEvent OnScoreDisplay;
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FScoreEvent OnScoreHide;
 
 	virtual void Tick(float DeltaTime) override;
+
+	void Score();
+	void EndScore();
+
+	UFUNCTION(BlueprintCallable)
+	void AddAmmunitions(ERocketType type, int count = 1);
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
