@@ -18,6 +18,6 @@ void Ultime::Use(ADeathRocket_ProtoCharacter* user)
 	{
 		user->ForceReload();
 		user->ForceAim();
-		user->AddAmmunitions(ultimeRocket);
+		user->AddAmmunitions(ultimeRocket, 1, true);
 	}
 }
