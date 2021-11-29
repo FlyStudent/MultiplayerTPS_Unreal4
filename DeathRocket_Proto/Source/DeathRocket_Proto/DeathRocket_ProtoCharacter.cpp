@@ -82,7 +82,6 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 
 	// Setting values
 	curAmmo = ammoMax;
-	team = FColor::Blue;
 }
 
 ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
