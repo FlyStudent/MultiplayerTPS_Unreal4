@@ -168,8 +168,14 @@ protected:
 	void Aim();
 	void StopAiming();
 
+	class Timer* hitmarkerTimer;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnHitmarkerDisplay;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnHitmarkerHide;
 	UFUNCTION()
 	void OnDeath();
+	void EndHitmarker();
 
 	void Respawn();
 
