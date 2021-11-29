@@ -36,6 +36,8 @@ class ADeathRocket_ProtoCharacter : public ACharacter, public IDamageableInterfa
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* RocketLauncher;
 
+	FString nickname = "";
+
 public:
 	ADeathRocket_ProtoCharacter();
 	~ADeathRocket_ProtoCharacter();
@@ -217,6 +219,9 @@ public:
 
 	void Score();
 	void EndScore();
+
+	UFUNCTION(BlueprintCallable)
+	const FString& GetName() const;
 
 	UFUNCTION(BlueprintCallable)
 	void AddAmmunitions(ERocketType type, int count = 1, bool setToHead = false);

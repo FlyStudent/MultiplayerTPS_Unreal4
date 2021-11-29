@@ -136,6 +136,24 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	}
 	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
+
+	//nickname
+	AController* controller = GetController();
+	if (controller)
+	{
+		APlayerController* pc = Cast<APlayerController>(controller);
+		int id = pc->NetPlayerIndex;
+		if (nickname == "")
+		{
+			char c = id + 1 + '0';
+			nickname = "Player";
+			nickname.AppendChar(c);
+		}
+	}
+	else
+	{
+		nickname = "Reconnect controller";
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -598,6 +616,11 @@ void ADeathRocket_ProtoCharacter::EndScore()
 		return;
 
 	OnScoreHide.Broadcast();
+}
+
+const FString& ADeathRocket_ProtoCharacter::GetName() const
+{
+	return nickname;
 }
 
 void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
