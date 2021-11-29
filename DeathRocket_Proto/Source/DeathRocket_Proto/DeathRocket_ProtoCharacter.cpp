@@ -66,6 +66,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetupAttachment(RootComponent);
 
 	healthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
@@ -321,7 +322,6 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FHitResult HitObject;
 	//FHitResult HitObject2;
 	bool Hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), camLocWorld,  camLocWorld + camForward * 10000, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::None, HitObject, true, FColor::White, FColor::Red, 0.3f);
-	//UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(), RocketLauncher->GetSocketLocation("RocketCanon"), HitObject.Location, ObjectTypes, false, ActorsToIgnore, EDrawDebugTrace::Persistent, HitObject2, true, FColor::Green, FColor::Red, 0.3f);
 	
 	// Spawn rocket according to first ammunition's type, else default type
 	TSubclassOf<class ARocket> rocketClass;
@@ -512,24 +512,49 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 	Aim();
 }
 
-
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
-	KOs++;
-	Respawn();
+	SetRagdollOn();
+	UpdateScoreboard();
+}
 
-	if (!lastDamager)
+void ADeathRocket_ProtoCharacter::UpdateScoreboard()
+{
+	KOs++;
+
+	if (lastDamager)
 		return;
 
 	if (lastDamager->team == team)
 	{
-		--lastDamager->kills;
+		lastDamager->kills--;
+		return;
 	}
-	else
-	{
-		++lastDamager->kills;
-		lastDamager->ultimeComp->IncreaseByKill();
-	}
+
+	lastDamager->kills++;
+	lastDamager->ultimeComp->IncreaseByKill();
+}
+
+void ADeathRocket_ProtoCharacter::SetRagdollOn()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	GetCharacterMovement()->Deactivate();
+
+	meshTransform = GetMesh()->GetRelativeTransform();
+	GetMesh()->SetSimulatePhysics(true);
+}
+
+void ADeathRocket_ProtoCharacter::SetRagdollOff()
+{
+	GetMesh()->SetSimulatePhysics(false);
+
+	//GetMesh()->SetupAttachment(RootComponent);
+	GetMesh()->SetRelativeTransform(meshTransform);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	GetCharacterMovement()->Activate();
 }
 
 void ADeathRocket_ProtoCharacter::Respawn()
@@ -548,6 +573,8 @@ void ADeathRocket_ProtoCharacter::Respawn()
 				spawnManager->SpawnControllerAtPlayerStart(playerController);
 		}
 	}
+
+	SetRagdollOff();
 }
 
 void ADeathRocket_ProtoCharacter::Sprint()

@@ -171,7 +171,15 @@ protected:
 	UFUNCTION()
 	void OnDeath();
 
+	void UpdateScoreboard();
+
+	UFUNCTION(BlueprintCallable)
 	void Respawn();
+
+	FTransform meshTransform;
+
+	void SetRagdollOn();
+	void SetRagdollOff();
 
 	UFUNCTION()
 	void Sprint();
