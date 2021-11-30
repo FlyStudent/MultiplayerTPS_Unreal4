@@ -176,6 +176,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void Respawn();
 
+	bool isOnRagdoll = false;
 	FTransform meshTransform;
 
 	void SetRagdollOn();

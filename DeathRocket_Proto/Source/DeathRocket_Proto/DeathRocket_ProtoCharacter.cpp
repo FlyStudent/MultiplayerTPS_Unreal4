@@ -537,6 +537,11 @@ void ADeathRocket_ProtoCharacter::UpdateScoreboard()
 
 void ADeathRocket_ProtoCharacter::SetRagdollOn()
 {
+	if (isOnRagdoll)
+		return;
+
+	isOnRagdoll = true;
+
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	GetCharacterMovement()->Deactivate();
@@ -547,6 +552,11 @@ void ADeathRocket_ProtoCharacter::SetRagdollOn()
 
 void ADeathRocket_ProtoCharacter::SetRagdollOff()
 {
+	if (!isOnRagdoll)
+		return;
+
+	isOnRagdoll = false;
+
 	GetMesh()->SetSimulatePhysics(false);
 
 	GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
