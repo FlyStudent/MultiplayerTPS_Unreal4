@@ -549,7 +549,7 @@ void ADeathRocket_ProtoCharacter::SetRagdollOff()
 {
 	GetMesh()->SetSimulatePhysics(false);
 
-	//GetMesh()->SetupAttachment(RootComponent);
+	GetMesh()->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 	GetMesh()->SetRelativeTransform(meshTransform);
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
