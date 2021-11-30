@@ -22,6 +22,7 @@
 #include "Ultime.h"
 #include "Timer.h"
 #include "ScoreManager.h"
+#include "KillFeedManager.h"
 
 #define MAX_ACCELERATION 500000.f
 
@@ -514,21 +515,26 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
 	SetRagdollOn();
-	UpdateScoreboard();
+	UpdateDeathDisplay();
 }
-void ADeathRocket_ProtoCharacter::UpdateScoreboard()
+void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 {
 	KOs++;
 
 	if (!lastDamager)
 		return;
 
+	if (lastDamager->killfeedManager)
+		lastDamager->killfeedManager->OnDisplayFeed.Broadcast(lastDamager->GetName(), lastDamager->team,
+															  GetName(), team);
+
 	if (lastDamager->team == team)
 	{
 		lastDamager->kills--;
 		return;
 	}
-		lastDamager->OnHitmarkerDisplay.Broadcast();
+
+	lastDamager->OnHitmarkerDisplay.Broadcast();
 
 	lastDamager->kills++;
 	lastDamager->ultimeComp->IncreaseByKill();

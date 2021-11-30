@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScoreEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUIEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
 UENUM(BlueprintType)
@@ -169,11 +170,11 @@ protected:
 	void StopAiming();
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
-	FScoreEvent OnHitmarkerDisplay;
+	FUIEvent OnHitmarkerDisplay;
 	UFUNCTION()
 	void OnDeath();
 
-	void UpdateScoreboard();
+	void UpdateDeathDisplay();
 
 	UFUNCTION(BlueprintCallable)
 	void Respawn();
@@ -222,6 +223,8 @@ public:
 
 	void Score();
 	void EndScore();
+
+	class AKillFeedManager* killfeedManager;
 
 	UFUNCTION(BlueprintCallable)
 	void AddAmmunitions(ERocketType type, int count = 1, bool setToHead = false);
