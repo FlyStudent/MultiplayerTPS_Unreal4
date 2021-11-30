@@ -13,7 +13,9 @@ class DEATHROCKET_PROTO_API AMenuGameMode : public AGameModeBase
 	GENERATED_BODY()
 	
 private:
-	TArray<class APlayerStart*> playerStarts;
+	TArray<FVector> playerFlags;
+	FVector firstPlayerLocation = FVector(600.f, -400.f, 400.f);
+
 
 	void StartPlay() override;
 	void SpawnControllerAtPlayerStart(APlayerController* controller);

@@ -19,7 +19,7 @@ class DEATHROCKET_PROTO_API UDeathRocket_GameInstance : public UGameInstance
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<FPlayerParams> playerParams;
 
 public:
