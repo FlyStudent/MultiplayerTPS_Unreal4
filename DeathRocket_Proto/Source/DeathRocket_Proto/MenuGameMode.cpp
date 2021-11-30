@@ -13,6 +13,8 @@ AMenuGameMode::AMenuGameMode()
 
 	for (int i = 0; i < 4; i++)
 		playerConnected.Add(false);
+
+	OnGoToSelection.AddDynamic(this, &AMenuGameMode::ResetSelectionMenu);
 }
 
 void AMenuGameMode::StartPlay()
@@ -33,8 +35,9 @@ void AMenuGameMode::SetPlayer(APlayerController* controller)
 {
 	int id = UGameplayStatics::GetPlayerControllerID(controller);
 	playerConnected[id] = true;
+	connectedCount++;
 	SpawnControllerAtPlayerStart(controller);
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Join"));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Join"));
 	OnPlayerJoin.Broadcast(id);
 }
 
@@ -46,4 +49,25 @@ void AMenuGameMode::SpawnControllerAtPlayerStart(APlayerController* controller)
 		FVector currentStart = playerFlags[UGameplayStatics::GetPlayerControllerID(controller)];
 		controller->AcknowledgedPawn->SetActorLocation(currentStart);
 	}
+}
+
+void AMenuGameMode::ResetSelectionMenu()
+{
+	for (bool& connect : playerConnected)
+		connect = false;
+
+	connectedCount = 0;
+
+	// Remove player spawn
+}
+
+void AMenuGameMode::PlayGame()
+{
+	// Reset player count
+	for (int i = 3; i >= 0; i--)
+		UGameplayStatics::RemovePlayer(UGameplayStatics::GetPlayerController(GetWorld(), i), true);
+
+	UGameplayStatics::SetForceDisableSplitscreen(GetWorld(), false);
+	UGameplayStatics::OpenLevel(GetWorld(), "ThirdPersonExampleMap");
+
 }

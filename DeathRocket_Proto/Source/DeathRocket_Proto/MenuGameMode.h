@@ -19,17 +19,22 @@ private:
 
 	void StartPlay() override;
 	void SpawnControllerAtPlayerStart(APlayerController* controller);
+	void ResetSelectionMenu();
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool waiting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<bool> playerConnected;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	int connectedCount = 0;
 
 	AMenuGameMode();
 
 	UFUNCTION(BlueprintCallable)
 	void SetPlayer(APlayerController* controller);
+	UFUNCTION(BlueprintCallable)
+	void PlayGame();
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FGameModeDelegate OnGoToSelection;
