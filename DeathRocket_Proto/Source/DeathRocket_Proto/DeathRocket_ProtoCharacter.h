@@ -168,6 +168,8 @@ protected:
 	void Aim();
 	void StopAiming();
 
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FScoreEvent OnHitmarkerDisplay;
 	UFUNCTION()
 	void OnDeath();
 
@@ -217,6 +219,7 @@ public:
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int  GetKillsCount() const { return kills; };
 	UFUNCTION(BlueprintCallable)

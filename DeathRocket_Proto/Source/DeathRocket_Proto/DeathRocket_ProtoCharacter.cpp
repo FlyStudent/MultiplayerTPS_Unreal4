@@ -374,7 +374,6 @@ void ADeathRocket_ProtoCharacter::CreateDefaultUltime()
 	ultimeComp->SetUltime(ultime);
 }
 
-
 void ADeathRocket_ProtoCharacter::Reload()
 {
 	if (curAmmo == ammoMax || reloading)
@@ -512,7 +511,6 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 	Aim();
 }
 
-
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
 	KOs++;
@@ -527,6 +525,8 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 	}
 	else
 	{
+		lastDamager->OnHitmarkerDisplay.Broadcast();
+
 		++lastDamager->kills;
 		lastDamager->ultimeComp->IncreaseByKill();
 	}
