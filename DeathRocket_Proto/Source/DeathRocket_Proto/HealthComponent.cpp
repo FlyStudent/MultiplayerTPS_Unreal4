@@ -12,6 +12,7 @@ void UHealthComponent::Reset()
     SetLife(maxLife);
 
     isInvicible = false;
+    isAlive = true;
     GetWorld()->GetTimerManager().ClearTimer(invicibleTimer);
 }
 
@@ -43,6 +44,10 @@ void UHealthComponent::ResetInvicibility()
 
 void UHealthComponent::Kill()
 {
+    if (!isAlive)
+        return;
+
+    isAlive = false;
     OnKill.Broadcast();
 }
 

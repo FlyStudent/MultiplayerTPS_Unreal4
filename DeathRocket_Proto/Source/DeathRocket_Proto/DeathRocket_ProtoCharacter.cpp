@@ -522,7 +522,7 @@ void ADeathRocket_ProtoCharacter::UpdateScoreboard()
 {
 	KOs++;
 
-	if (lastDamager)
+	if (!lastDamager)
 		return;
 
 	if (lastDamager->team == team)

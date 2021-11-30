@@ -24,7 +24,8 @@ class DEATHROCKET_PROTO_API UHealthComponent : public UActorComponent
 
     FTimerHandle invicibleTimer;
 
-    bool isInvicible;
+    bool isInvicible = false;
+    bool isAlive = false;
 
     UFUNCTION()
     void ResetInvicibility();
