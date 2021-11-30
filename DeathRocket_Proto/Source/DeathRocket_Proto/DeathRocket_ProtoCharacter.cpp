@@ -99,7 +99,6 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
 	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
-	hitmarkerTimer = new Timer(GetWorld(), 0.5f);
 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
@@ -528,16 +527,10 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 	else
 	{
 		lastDamager->OnHitmarkerDisplay.Broadcast();
-		lastDamager->hitmarkerTimer->Reset(lastDamager, &ADeathRocket_ProtoCharacter::EndHitmarker);
 
 		++lastDamager->kills;
 		lastDamager->ultimeComp->IncreaseByKill();
 	}
-}
-
-void ADeathRocket_ProtoCharacter::EndHitmarker()
-{
-	OnHitmarkerHide.Broadcast();
 }
 
 void ADeathRocket_ProtoCharacter::Respawn()
