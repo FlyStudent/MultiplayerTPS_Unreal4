@@ -11,7 +11,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScoreEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUIEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FKillFeedEvent, FString, killer, FString, victim);
 
 UENUM(BlueprintType)
 enum class ERocketType : uint8 {
@@ -37,8 +36,6 @@ class ADeathRocket_ProtoCharacter : public ACharacter, public IDamageableInterfa
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Items, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* RocketLauncher;
-
-	FString nickname = "";
 
 public:
 	ADeathRocket_ProtoCharacter();
@@ -222,16 +219,7 @@ public:
 	void Score();
 	void EndScore();
 
-	UFUNCTION(BlueprintCallable)
-	const FString& GetNickName() const;
-
-	class Timer* killfeedTimer;
-	UPROPERTY(BlueprintAssignable, Category = Event)
-	FKillFeedEvent OnDisplayKillFeedLine;
-	UPROPERTY(BlueprintAssignable, Category = Event)
-	FUIEvent OnDeleteKillFeedLine;
-
-	void DeleteKillFeedLine();
+	class AKillFeedManager* killfeedManager;
 
 	UFUNCTION(BlueprintCallable)
 	void AddAmmunitions(ERocketType type, int count = 1, bool setToHead = false);

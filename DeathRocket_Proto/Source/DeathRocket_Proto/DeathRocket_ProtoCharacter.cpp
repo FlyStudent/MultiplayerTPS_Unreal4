@@ -22,6 +22,7 @@
 #include "Ultime.h"
 #include "Timer.h"
 #include "ScoreManager.h"
+#include "KillFeedManager.h"
 
 #define MAX_ACCELERATION 500000.f
 
@@ -100,7 +101,6 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	reloadTimer = new Timer(GetWorld(), reloadTime);
 	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
 	hitmarkerTimer = new Timer(GetWorld(), 0.5f);
-	killfeedTimer = new Timer(GetWorld(), 1.f);
 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
@@ -137,24 +137,6 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	}
 	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
-
-	//nickname
-	AController* controller = GetController();
-	if (controller)
-	{
-		APlayerController* pc = Cast<APlayerController>(controller);
-		int id = pc->NetPlayerIndex;
-		if (nickname == "")
-		{
-			char c = id + 1 + '0';
-			nickname = "Player";
-			nickname.AppendChar(c);
-		}
-	}
-	else
-	{
-		nickname = "Reconnect controller";
-	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -540,8 +522,8 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 	if (!lastDamager)
 		return;
 
-	lastDamager->OnDisplayKillFeedLine.Broadcast(lastDamager->GetNickName(), GetNickName());
-	lastDamager->killfeedTimer->Reset(lastDamager, &ADeathRocket_ProtoCharacter::DeleteKillFeedLine);
+	lastDamager->killfeedManager->OnDisplayFeed.Broadcast(lastDamager->GetName(), lastDamager->team,
+														  GetName(), team);
 
 	if (lastDamager->team == team)
 	{
@@ -620,16 +602,6 @@ void ADeathRocket_ProtoCharacter::EndScore()
 		return;
 
 	OnScoreHide.Broadcast();
-}
-
-const FString& ADeathRocket_ProtoCharacter::GetNickName() const
-{
-	return nickname;
-}
-
-void ADeathRocket_ProtoCharacter::DeleteKillFeedLine()
-{
-	OnDeleteKillFeedLine.Broadcast();
 }
 
 void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
