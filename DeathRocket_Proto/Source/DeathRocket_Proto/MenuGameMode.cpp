@@ -14,6 +14,20 @@ AMenuGameMode::AMenuGameMode()
 	for (int i = 0; i < 4; i++)
 		playerConnected.Add(false);
 
+	teamList.Add(FColor::Blue);
+	teamList.Add(FColor::Red);
+	teamList.Add(FColor::Yellow);
+	teamList.Add(FColor::Green);
+
+	nicknameList.Add("Player 1");
+	nicknameList.Add("Player 2");
+	nicknameList.Add("Player 3");
+	nicknameList.Add("Player 4");
+	nicknameList.Add("Winner");
+	nicknameList.Add("Loser");
+	nicknameList.Add("Nothing");
+	nicknameList.Add("Destined to die");
+
 	OnGoToSelection.AddDynamic(this, &AMenuGameMode::ResetSelectionMenu);
 }
 

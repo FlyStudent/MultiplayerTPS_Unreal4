@@ -16,6 +16,10 @@ private:
 	TArray<FVector> playerFlags;
 	FVector firstPlayerLocation = FVector(600.f, -400.f, 400.f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TArray<FColor> teamList;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TArray<FString> nicknameList;
 
 	void StartPlay() override;
 	void SpawnControllerAtPlayerStart(APlayerController* controller);
