@@ -106,6 +106,9 @@ protected:
 	class Timer* gamepadUltimeTimer;
 	bool gamepadUltimeUse = false;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString nickName = "Player";
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Team)
 	FColor team;
 	UFUNCTION(BlueprintCallable)
@@ -237,7 +240,13 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	UFUNCTION(BlueprintCallable)
+	FORCEINLINE FString GetNickName() const { return nickName; }
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE FColor GetTeam() const { return team; }
+
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int  GetKillsCount() const { return kills; };
+
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int  GetDeathsCount() const { return KOs; };
 

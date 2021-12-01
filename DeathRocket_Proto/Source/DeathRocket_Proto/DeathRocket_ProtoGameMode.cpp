@@ -12,5 +12,4 @@ ADeathRocket_ProtoGameMode::ADeathRocket_ProtoGameMode()
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
-
 }
