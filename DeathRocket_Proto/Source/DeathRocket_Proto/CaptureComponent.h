@@ -25,7 +25,7 @@ private:
 protected:
 	virtual void BeginPlay() override;
 
-
+	UPROPERTY(BlueprintReadOnly)
 	class ACaptureArea* currentArea;
 	bool isEntered = false;
 	bool isCapturing = false;
