@@ -7,6 +7,7 @@
 #include "DamageableInterface.h"
 #include "DamageableInterface.h"
 #include "GameFramework/Character.h"
+#include "DeathRocket_ProtoCharacter.h"
 
 // Sets default values
 ARocket::ARocket()
@@ -38,6 +39,8 @@ void ARocket::Initialize(const FVector& direction)
 {
     if (ProjectileMovement)
         ProjectileMovement->Velocity = direction * ProjectileMovement->InitialSpeed;
+
+    shooter = Cast<ADeathRocket_ProtoCharacter>(GetOwner());
 }
 
 // Called when the game starts or when spawned

@@ -196,6 +196,10 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	class Timer* secondTripleBulletTimer;
+	class Timer* thirdTripleBulletTimer;
+	float TripleBulletTime = 0.2f;
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UHealthComponent* healthComp;
