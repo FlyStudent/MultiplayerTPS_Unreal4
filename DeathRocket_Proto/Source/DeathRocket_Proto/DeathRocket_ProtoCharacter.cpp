@@ -543,8 +543,8 @@ void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 		return;
 
 	if (lastDamager->killfeedManager)
-		lastDamager->killfeedManager->OnDisplayFeed.Broadcast(lastDamager->GetName(), lastDamager->team,
-															  GetName(), team);
+		lastDamager->killfeedManager->OnDisplayFeed.Broadcast(lastDamager->GetNickName(), lastDamager->team,
+																GetNickName(), team);
 
 	if (lastDamager->team == team)
 	{
