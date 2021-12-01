@@ -23,6 +23,7 @@ private:
 
 	void StartPlay() override;
 	void SpawnControllerAtPlayerStart(APlayerController* controller);
+	UFUNCTION()
 	void ResetSelectionMenu();
 
 public:
@@ -30,6 +31,8 @@ public:
 	bool waiting = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<bool> playerConnected;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool player1Connected = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int connectedCount = 0;
 

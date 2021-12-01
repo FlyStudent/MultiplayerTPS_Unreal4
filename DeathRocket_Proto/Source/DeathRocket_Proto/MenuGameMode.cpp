@@ -50,8 +50,12 @@ void AMenuGameMode::SetPlayer(APlayerController* controller)
 	int id = UGameplayStatics::GetPlayerControllerID(controller);
 	playerConnected[id] = true;
 	connectedCount++;
+
+	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Player number ") + FString::FromInt(id));
+	if (id == 0)
+		player1Connected = true;
+
 	SpawnControllerAtPlayerStart(controller);
-	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Join"));
 	OnPlayerJoin.Broadcast(id);
 }
 
@@ -71,6 +75,7 @@ void AMenuGameMode::ResetSelectionMenu()
 		connect = false;
 
 	connectedCount = 0;
+	player1Connected = false;
 
 	// Remove player spawn
 }
