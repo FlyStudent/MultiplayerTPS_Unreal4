@@ -96,6 +96,8 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	fireTimer = new Timer(GetWorld(), fireRate);
 	reloadTimer = new Timer(GetWorld(), reloadTime);
 	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
+	secondTripleBulletTimer = new Timer(GetWorld(), TripleBulletTime);
+	thirdTripleBulletTimer = new Timer(GetWorld(), TripleBulletTime * 2);
 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
@@ -330,6 +332,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	else
 		rocketClass = rocketClasses[ERocketType::BASIC];
 
+	//secondTripleBulletTimer->Reset();
 	if (rocketClass != rocketClasses[ERocketType::TRIPLE])
 	{
 		if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
@@ -343,6 +346,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 	}
 	else
 	{
+		
 		for (int i = 0; i < 3; i++)
 		{
 			if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))

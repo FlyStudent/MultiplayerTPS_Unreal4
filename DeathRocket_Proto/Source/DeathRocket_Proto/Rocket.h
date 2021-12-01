@@ -25,6 +25,7 @@ private:
 	class USphereComponent* HeadComp;
 
 	//the player that shoots this rocket
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class ADeathRocket_ProtoCharacter* shooter;
 
 public:	
