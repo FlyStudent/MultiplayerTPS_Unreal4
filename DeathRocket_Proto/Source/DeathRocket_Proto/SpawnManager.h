@@ -24,6 +24,8 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void SetPlayerStarts();
+
 	int lastPlayerStart = 0;
 
 	TArray<class APlayerStart*> playerStarts;

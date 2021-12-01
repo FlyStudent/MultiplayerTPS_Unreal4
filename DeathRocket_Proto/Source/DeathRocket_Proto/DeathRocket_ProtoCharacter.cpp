@@ -36,10 +36,6 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
-	// set our turn rates for input
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
-
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = true;
 	bUseControllerRotationYaw = true;
@@ -238,13 +234,13 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 void ADeathRocket_ProtoCharacter::TurnAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	AddControllerYawInput(Rate * horizontalSensitivity * GetWorld()->GetDeltaSeconds());
 }
 
 void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 {
 	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	AddControllerPitchInput(Rate * verticalSensitivity * GetWorld()->GetDeltaSeconds());
 }
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
@@ -534,6 +530,7 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 	SetRagdollOn();
 	UpdateDeathDisplay();
 }
+
 void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 {
 	KOs++;

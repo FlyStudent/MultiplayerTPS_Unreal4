@@ -42,12 +42,12 @@ public:
 	~ADeathRocket_ProtoCharacter();
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float BaseTurnRate;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
+	float horizontalSensitivity = 45.f;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float BaseLookUpRate;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
+	float verticalSensitivity = 45.f;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = Weapon)
