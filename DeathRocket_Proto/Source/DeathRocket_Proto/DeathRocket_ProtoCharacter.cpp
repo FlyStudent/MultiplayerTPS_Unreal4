@@ -334,13 +334,30 @@ void ADeathRocket_ProtoCharacter::Fire()
 	else
 		rocketClass = rocketClasses[ERocketType::BASIC];
 
-	if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
+	if (rocketClass != rocketClasses[ERocketType::TRIPLE])
 	{
-		FVector RocketDir = Hit ? HitObject.Location - spawnLocation : camForward;
+		if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
+		{
+			FVector RocketDir = Hit ? HitObject.Location - spawnLocation : camForward;
 
-		RocketDir.Normalize();
+			RocketDir.Normalize();
 
-		rocket->Initialize(RocketDir);
+			rocket->Initialize(RocketDir);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
+			{
+				FVector RocketDir = Hit ? HitObject.Location - spawnLocation : camForward;
+
+				RocketDir.Normalize();
+
+				rocket->Initialize(RocketDir);
+			}
+		}
 	}
 	// Cancel forced aim (used for ultime)
 	if (aimForced)
@@ -553,6 +570,9 @@ void ADeathRocket_ProtoCharacter::SetRagdollOn()
 
 	meshTransform = GetMesh()->GetRelativeTransform();
 	GetMesh()->SetSimulatePhysics(true);
+
+	CameraBoom->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+
 }
 
 void ADeathRocket_ProtoCharacter::SetRagdollOff()
@@ -561,6 +581,8 @@ void ADeathRocket_ProtoCharacter::SetRagdollOff()
 		return;
 
 	isOnRagdoll = false;
+
+	CameraBoom->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 
 	GetMesh()->SetSimulatePhysics(false);
 

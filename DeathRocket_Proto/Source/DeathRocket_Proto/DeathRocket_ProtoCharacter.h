@@ -14,9 +14,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
 
 UENUM(BlueprintType)
 enum class ERocketType : uint8 {
-	BASIC = 0 UMETA(DisplayName = "BASIC"),
-	BIG = 1 UMETA(DisplayName = "BIG"),
-	HEAD = 2 UMETA(DisplayName = "HEAD")
+	BASIC  UMETA(DisplayName = "BASIC"),
+	BIG UMETA(DisplayName = "BIG"),
+	TRIPLE UMETA(DisplayName = "TRIPLE")
 };
 
 UCLASS(config=Game)
