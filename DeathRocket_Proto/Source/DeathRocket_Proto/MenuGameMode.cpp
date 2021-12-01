@@ -18,15 +18,19 @@ AMenuGameMode::AMenuGameMode()
 	teamList.Add(FColor::Red);
 	teamList.Add(FColor::Yellow);
 	teamList.Add(FColor::Green);
+	teamList.Add(FColor::Purple);
+	teamList.Add(FColor::Silver);
 
 	nicknameList.Add("Player 1");
 	nicknameList.Add("Player 2");
-	nicknameList.Add("Player 3");
-	nicknameList.Add("Player 4");
+	nicknameList.Add("Ironman");
+	nicknameList.Add("Chocolate");
 	nicknameList.Add("Winner");
 	nicknameList.Add("Loser");
-	nicknameList.Add("Nothing");
-	nicknameList.Add("Destined to die");
+	nicknameList.Add("Fly64");
+	nicknameList.Add("Dr3auxis");
+	nicknameList.Add("Damien");
+	nicknameList.Add("Rémi");
 
 	OnGoToSelection.AddDynamic(this, &AMenuGameMode::ResetSelectionMenu);
 }
