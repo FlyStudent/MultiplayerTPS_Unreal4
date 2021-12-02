@@ -16,7 +16,8 @@ UENUM(BlueprintType)
 enum class ERocketType : uint8 {
 	BASIC  UMETA(DisplayName = "BASIC"),
 	BIG UMETA(DisplayName = "BIG"),
-	TRIPLE UMETA(DisplayName = "TRIPLE")
+	TRIPLE UMETA(DisplayName = "TRIPLE"),
+	AIMING UMETA(DisplayName = "AIMING")
 };
 
 UCLASS(config=Game)

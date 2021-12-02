@@ -11,7 +11,7 @@ class DEATHROCKET_PROTO_API ARocket : public AActor
 {
 	GENERATED_BODY()
 	
-private:
+protected:
 	TArray<AActor*> ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
 
@@ -33,22 +33,22 @@ public:
 	float selfDamageMultiplier = 0.25f;
 
 	UPROPERTY(EditAnywhere);
-	float selfLaunchForceMultiplier = 2.f;
+	float selfLaunchForceMultiplier = 5.f;
 
 	UPROPERTY(EditAnywhere);
-	int damage = 25.f;
+	int damage = 50;
 
 	UPROPERTY(EditAnywhere);
-	int impulseForce = 500.f;
+	int impulseForce = 25000;
 
 	UPROPERTY(EditAnywhere);
-	int launchForce = 5.f;
+	int launchForce = 5000;
 
 	UPROPERTY(EditAnywhere);
-	float damageRadius = 100.f;
+	float damageRadius = 250.f;
 
 	UPROPERTY(EditAnywhere);
-	float distanceMultiplier = 1.f;
+	float distanceMultiplier = 100.f;
 
 	// Sets default values for this actor's properties
 	ARocket();
@@ -67,5 +67,5 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 };
