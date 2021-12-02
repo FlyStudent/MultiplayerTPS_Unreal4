@@ -54,7 +54,9 @@ protected:
 	TMap<ERocketType, TSubclassOf<class ARocket>> rocketClasses;
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	TArray<ERocketType> rocketAmmunitions;
+	TArray<ERocketType> specialAmmos;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	uint8 maxSpecialAmmos = 1;
 
 	TArray<AActor*> ActorsToIgnore;
 	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
@@ -234,7 +236,7 @@ public:
 	class AKillFeedManager* killfeedManager;
 
 	UFUNCTION(BlueprintCallable)
-	void AddAmmunitions(ERocketType type, int count = 1, bool setToHead = false);
+	bool AddAmmunitions(ERocketType type, int count = 1, bool ultime = false);
 
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }

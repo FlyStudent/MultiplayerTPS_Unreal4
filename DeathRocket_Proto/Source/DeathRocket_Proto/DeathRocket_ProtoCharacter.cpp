@@ -183,7 +183,7 @@ void ADeathRocket_ProtoCharacter::SetTeamColor(const FColor& teamColor)
 
 float ADeathRocket_ProtoCharacter::GetAreaDirectionAngle() const
 {
-	if (captureComp->AreaDetected())
+	if (captureComp && captureComp->AreaDetected())
 	{
 		FVector loc = GetActorLocation();
 		FVector areaLoc = captureComp->GetAreaLocation();
@@ -281,18 +281,26 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 	}
 }
 
-void ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool setToHead)
+bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool ultime)
 {
-	if (!setToHead)
+	// Ultime ammo ignore max ammo
+	if (ultime)
 	{
 		for (int i = 0; i < count; i++)
-			rocketAmmunitions.Add(type);
+			specialAmmos.Insert(type, 0);
+
+		return true;
 	}
-	else
+	// Other ammo don't ignore max ammo, however we can exceed the limit in a raw only
+	else if (specialAmmos.Num() < maxSpecialAmmos)
 	{
 		for (int i = 0; i < count; i++)
-			rocketAmmunitions.Insert(type, 0);
+			specialAmmos.Add(type);
+
+		return true;
 	}
+
+	return false;
 }
 
 void ADeathRocket_ProtoCharacter::Fire()
@@ -324,10 +332,10 @@ void ADeathRocket_ProtoCharacter::Fire()
 	
 	// Spawn rocket according to first ammunition's type, else default type
 	TSubclassOf<class ARocket> rocketClass;
-	if (rocketAmmunitions.Num() != 0)
+	if (specialAmmos.Num() != 0)
 	{
-		rocketClass = rocketClasses[rocketAmmunitions[0]];
-		rocketAmmunitions.RemoveAt(0);
+		rocketClass = rocketClasses[specialAmmos[0]];
+		specialAmmos.RemoveAt(0);
 	}
 	else
 		rocketClass = rocketClasses[ERocketType::BASIC];
