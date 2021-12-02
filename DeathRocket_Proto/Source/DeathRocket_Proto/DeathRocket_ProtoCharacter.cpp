@@ -153,7 +153,7 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Gamepad Ultime", IE_Pressed, this, &ADeathRocket_ProtoCharacter::GamepadUltimeInput);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
-	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::InputReload);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, sprintComp, &USprintComponent::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
@@ -212,7 +212,8 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	if (GetCharacterMovement()->IsFalling())
 		GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity.GetClampedToMaxSize(inAirMaxSpeed);
 
-	sprintComp->TickStamina(DeltaTime, isMoving);
+	if (sprintComp)
+		sprintComp->TickStamina(DeltaTime, isMoving);
 
 	// Camera
 	{
@@ -224,10 +225,8 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 	}
 
 	// Reload
-	if (reloading && isMoving)
-		reloadTimer->Pause();
-	else if (reloading)
-		reloadTimer->Resume();
+	if (curAmmo <= 0 && !reloading && !isMoving)
+		Reload();
 
 	UpdateTimersProgress();
 	BroadcastUIUpdate();
@@ -247,10 +246,7 @@ void ADeathRocket_ProtoCharacter::LookUpAtRate(float Rate)
 
 void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 {
-	if (stopMovementForward && Value == 0.0f)
-		stopMovementForward = false;
-
-	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovementForward)
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is forward
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -265,10 +261,7 @@ void ADeathRocket_ProtoCharacter::MoveForward(float Value)
 
 void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 {
-	if (stopMovementRight && Value == 0.0f)
-		stopMovementRight = false;
-
-	if ((Controller != nullptr) && (Value != 0.0f) && !stopMovementRight)
+	if ((Controller != nullptr) && (Value != 0.0f))
 	{
 		// find out which way is right
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -279,28 +272,6 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
-}
-
-bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool ultime)
-{
-	// Ultime ammo ignore max ammo
-	if (ultime)
-	{
-		for (int i = 0; i < count; i++)
-			specialAmmos.Insert(type, 0);
-
-		return true;
-	}
-	// Other ammo don't ignore max ammo, however we can exceed the limit in a raw only
-	else if (specialAmmos.Num() < maxSpecialAmmos)
-	{
-		for (int i = 0; i < count; i++)
-			specialAmmos.Add(type);
-
-		return true;
-	}
-
-	return false;
 }
 
 void ADeathRocket_ProtoCharacter::Fire()
@@ -381,11 +352,10 @@ void ADeathRocket_ProtoCharacter::Fire()
 	if (curAmmo == 0)
 	{
 		EndFire();
-		Reload();
 		return;
 	}
-	fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
-
+	else
+		fireTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndFire);
 }
 
 void ADeathRocket_ProtoCharacter::EndFire()
@@ -400,32 +370,58 @@ void ADeathRocket_ProtoCharacter::CreateDefaultUltime()
 	ultimeComp->SetUltime(ultime);
 }
 
-void ADeathRocket_ProtoCharacter::Reload()
+bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool ultime)
 {
-	if (curAmmo == ammoMax || reloading)
-		return;
+	// Can't pick ammo when reloading
+	if (reloading)
+		return false;
 
-	reloading = true;
-	StopAiming();
+	// Ultime ammo ignore max ammo
+	if (ultime)
+	{
+		for (int i = 0; i < count; i++)
+			specialAmmos.Insert(type, 0);
 
-	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
+		curAmmo += count;
+		OnAmmoUpdate.Broadcast();
+		return true;
+	}
+	// Other ammo don't ignore max ammo, however we can exceed the limit in a raw only
+	else if (specialAmmos.Num() < maxSpecialAmmos)
+	{
+		for (int i = 0; i < count; i++)
+			specialAmmos.Add(type);
+
+		curAmmo += count;
+		OnAmmoUpdate.Broadcast();
+		return true;
+	}
+
+	return false;
 }
 
-void ADeathRocket_ProtoCharacter::InputReload()
+void ADeathRocket_ProtoCharacter::Reload()
 {
-	if (curAmmo == ammoMax)
+	if (curAmmo >= ammoMax || reloading)
 		return;
 
-	stopMovementForward = true;
-	stopMovementRight = true;
+	StopAiming();
+	sprintComp->SetActivate(false);
 
-	Reload();
+	reloading = true;
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed() / 2.f;
+
+	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
 }
 
 void ADeathRocket_ProtoCharacter::EndReload()
 {
 	curAmmo = ammoMax;
+
 	OnAmmoUpdate.Broadcast();
+
+	sprintComp->SetActivate(true);
+	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 
 	reloading = false;
 }

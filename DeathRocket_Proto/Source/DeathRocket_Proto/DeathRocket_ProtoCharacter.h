@@ -70,13 +70,11 @@ protected:
 	// FIRE AND RELOAD
 	bool firing = false;
 	bool reloading = false;
-	bool stopMovementForward = false;
-	bool stopMovementRight = false;
 
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float fireRate = 1.f;
 	UPROPERTY(EditAnywhere, Category = Weapon)
-	float reloadTime = 5.f;
+	float reloadTime = 3.f;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float gamepadUltiInputTime = 0.1f;
 

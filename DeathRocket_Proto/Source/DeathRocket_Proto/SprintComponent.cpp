@@ -88,7 +88,7 @@ float USprintComponent::GetSpeed() const
 
 bool USprintComponent::CanSprint() const
 {
-	return !staminaRecovering;
+	return !staminaRecovering && sprintActivate;
 }
 
 bool USprintComponent::CanDash() const

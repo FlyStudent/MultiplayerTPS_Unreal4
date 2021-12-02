@@ -24,6 +24,8 @@ class DEATHROCKET_PROTO_API USprintComponent : public UActorComponent
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Dash", meta = (AllowPrivateAccess = "true"))
 		bool dashActivate = true;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+		bool sprintActivate = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement|Speed", meta = (AllowPrivateAccess = "true"))
 		float walkingSpeed = 600.f;
@@ -101,5 +103,6 @@ public:
 		FRecoverDelegate OnStaminaRecovery;
 
 	FORCEINLINE bool IsSprinting() const { return sprinting; }
+	FORCEINLINE void SetActivate(bool activate) { sprintActivate = activate; }
 	FORCEINLINE float GetRatio() const { return staminaRatio; }
 };
