@@ -132,6 +132,11 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 		ultimeComp->OnUltimeUsed.AddDynamic(this, &ADeathRocket_ProtoCharacter::CreateDefaultUltime);
 		CreateDefaultUltime();
 	}
+
+	if (captureComp)
+	{
+		captureComp->OnCaptureCompleted.AddDynamic(this, &ADeathRocket_ProtoCharacter::ZoneCapturedFeed);
+	}
 	
 	spawnManager = Cast<ASpawnManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ASpawnManager::StaticClass()));
 }
@@ -370,6 +375,14 @@ void ADeathRocket_ProtoCharacter::CreateDefaultUltime()
 	ultimeComp->SetUltime(ultime);
 }
 
+void ADeathRocket_ProtoCharacter::ZoneCapturedFeed()
+{
+	if (killfeedManager)
+	{
+		killfeedManager->CaptureHappened(nickName, team);
+	}
+}
+
 bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool ultime)
 {
 	// Can't pick ammo when reloading
@@ -548,7 +561,7 @@ void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 
 	if (lastDamager->killfeedManager)
 		lastDamager->killfeedManager->KillHappened(lastDamager->GetNickName(), lastDamager->team,
-																GetNickName(), team);
+																nickName, team);
 
 	if (lastDamager->team == team)
 	{

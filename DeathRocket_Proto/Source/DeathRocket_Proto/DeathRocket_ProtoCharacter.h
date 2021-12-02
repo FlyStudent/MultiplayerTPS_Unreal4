@@ -11,6 +11,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAmmoEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FScoreEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUIEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWidgetEvent, bool, visible);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FCaptureFeedEvent, FString, name,
+																FColor, color);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FKillFeedEvent, FString, killerName,
 															  FColor, killerColor,
 															  FString, victimName,
@@ -238,6 +240,11 @@ public:
 	class AKillFeedManager* killfeedManager;
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FKillFeedEvent OnDisplayFeed;
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FCaptureFeedEvent OnDisplayCapture;
+
+	UFUNCTION()
+	void ZoneCapturedFeed();
 
 	UFUNCTION(BlueprintCallable)
 	bool AddAmmunitions(ERocketType type, int count = 1, bool ultime = false);

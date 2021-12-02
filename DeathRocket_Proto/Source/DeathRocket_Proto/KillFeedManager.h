@@ -20,4 +20,5 @@ public:
 					  const FColor& killerColor,
 					  const FString& victimName,
 					  const FColor& victimColor);
+	void CaptureHappened(const FString& name, const FColor& color);
 };

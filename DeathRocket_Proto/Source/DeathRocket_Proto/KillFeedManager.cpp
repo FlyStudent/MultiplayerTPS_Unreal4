@@ -31,3 +31,12 @@ void AKillFeedManager::KillHappened(const FString& killerName, const FColor& kil
 		player->OnDisplayFeed.Broadcast(killerName, killerColor, victimName, victimColor);
 	}
 }
+
+void AKillFeedManager::CaptureHappened(const FString& name, const FColor& color)
+{
+	for (AActor* actor : players)
+	{
+		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
+		player->OnDisplayCapture.Broadcast(name, color);
+	}
+}
