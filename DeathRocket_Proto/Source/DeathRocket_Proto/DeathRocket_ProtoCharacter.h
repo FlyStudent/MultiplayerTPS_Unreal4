@@ -117,7 +117,7 @@ protected:
 	ADeathRocket_ProtoCharacter* lastDamager = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Team)
 	int allyDmgReduction = 2;
-	int kills = 0, KOs = 0;
+	int kills = 0, deaths = 0;
 
 	void Fire();
 	void EndFire();
@@ -248,7 +248,10 @@ public:
 	FORCEINLINE int  GetKillsCount() const { return kills; };
 
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE int  GetDeathsCount() const { return KOs; };
+	FORCEINLINE int  GetDeathsCount() const { return deaths; };
+
+	UFUNCTION(BlueprintCallable)
+	int  GetCaptureCount() const;
 
 	void OnDamage(AActor* from, int damage) override;
 

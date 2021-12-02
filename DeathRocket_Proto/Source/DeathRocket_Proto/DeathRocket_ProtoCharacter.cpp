@@ -541,7 +541,7 @@ void ADeathRocket_ProtoCharacter::OnDeath()
 
 void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 {
-	KOs++;
+	deaths++;
 
 	if (!lastDamager)
 		return;
@@ -672,4 +672,11 @@ void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 		lastDamager = player;
 		healthComp->Hurt(dmg);
 	}
+}
+
+int  ADeathRocket_ProtoCharacter::GetCaptureCount() const
+{
+	if (captureComp)
+		return captureComp->GetCaptureCount();
+	return 0;
 }

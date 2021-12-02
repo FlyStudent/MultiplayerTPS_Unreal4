@@ -20,12 +20,41 @@ AScoreManager::AScoreManager()
 
 		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
 		player->scoreManager = this;
+
+		if (int32 id = teamColors.Find(player->GetTeam()) != INDEX_NONE)
+			teams[id-1].players.Add(player);
+		else
+		{
+			id = teams.Add(FTeamScoring(player->GetTeam()));
+			teams[id].players.Add(player);
+			teamColors.Add(player->GetTeam());
+		}
+	}
+}
+
+void AScoreManager::UpdateEveryTeams()
+{
+	for (FTeamScoring& team : teams)
+	{
+		for (auto player : team.players)
+		{
+			team.kills += player->GetKillsCount();
+			team.areas += player->GetCaptureCount();
+		}
+
+		team.total = team.kills + team.areas;
 	}
 }
 
 const TArray<AActor*>& AScoreManager::GetEveryPlayers() const
 {
 	return players;
+}
+
+const TArray<FTeamScoring>& AScoreManager::GetEveryTeams()
+{
+	UpdateEveryTeams();
+	return teams;
 }
 
 // Called when the game starts or when spawned

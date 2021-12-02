@@ -52,6 +52,7 @@ void UCaptureComponent::AreaDestroyed()
 
 void UCaptureComponent::AreaCapturedBySelf()
 {
+	captureCount++;
 	OnCaptureCompleted.Broadcast();
 }
 

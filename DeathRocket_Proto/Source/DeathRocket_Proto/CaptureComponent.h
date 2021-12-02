@@ -33,6 +33,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		float captureTime = 10.f;
 
+	int captureCount = 0;
+
 	UFUNCTION()
 	void BeginAreaCapture();
 	UFUNCTION()
@@ -69,4 +71,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool AreaDetected() const { return currentArea != nullptr; }
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int GetCaptureCount() const { return captureCount; }
 };
