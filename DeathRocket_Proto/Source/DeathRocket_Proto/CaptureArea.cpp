@@ -44,10 +44,26 @@ void ACaptureArea::TickCapturePercent(const FColor& team, float deltaPercent)
 	if (tickFactor == 1.f)
 		previousCapturingTeam = team;
 
+	UpdateColor();
 	OnCaptureProcess.Broadcast();
 
 	if (curPercent >= 100.f)
 		AreaCaptured();
+}
+
+void ACaptureArea::UpdateColor()
+{
+	FColor blended = previousCapturingTeam;
+
+	for (auto capturingTeam : capturingTeams)
+	{
+		if (capturingTeam == previousCapturingTeam)
+			continue;
+
+		blended += capturingTeam;
+	}
+
+	previousCapturingTeam = blended;
 }
 
 bool ACaptureArea::TryCaptureArea(const FColor& team)

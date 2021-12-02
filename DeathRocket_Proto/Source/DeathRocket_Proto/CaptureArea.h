@@ -43,6 +43,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void TickCapturePercent(const FColor& team, float deltaPercent);
+	void UpdateColor();
 
 	bool TryCaptureArea(const FColor& team);
 
