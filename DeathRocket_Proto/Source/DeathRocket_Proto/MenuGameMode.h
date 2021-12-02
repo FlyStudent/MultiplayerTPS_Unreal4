@@ -32,7 +32,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<bool> playerConnected;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool player1Connected = false;
+	bool goodConnectionOrder = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int connectedCount = 0;
 

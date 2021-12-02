@@ -56,8 +56,17 @@ void AMenuGameMode::SetPlayer(APlayerController* controller)
 	connectedCount++;
 
 	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Player number ") + FString::FromInt(id));
-	if (id == 0)
-		player1Connected = true;
+	bool prev = true;
+	goodConnectionOrder = true;
+	for (bool& connected : playerConnected)
+	{
+		if (goodConnectionOrder && !prev && connected)
+		{
+			goodConnectionOrder = false;
+			break;
+		}
+		prev = connected;
+	}
 
 	SpawnControllerAtPlayerStart(controller);
 	OnPlayerJoin.Broadcast(id);
@@ -79,7 +88,7 @@ void AMenuGameMode::ResetSelectionMenu()
 		connect = false;
 
 	connectedCount = 0;
-	player1Connected = false;
+	goodConnectionOrder = false;
 
 	// Remove player spawn
 }
