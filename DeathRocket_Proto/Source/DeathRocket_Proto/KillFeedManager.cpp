@@ -16,7 +16,18 @@ AKillFeedManager::AKillFeedManager()
 	// Save them in memory
 	for (AActor* actor : actors)
 	{
+		players.Add(actor);
+
 		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
 		player->killfeedManager = this;
+	}
+}
+
+void AKillFeedManager::KillHappened(const FString& killerName, const FColor& killerColor, const FString& victimName, const FColor& victimColor)
+{
+	for (AActor* actor : players)
+	{
+		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
+		player->OnDisplayFeed.Broadcast(killerName, killerColor, victimName, victimColor);
 	}
 }
