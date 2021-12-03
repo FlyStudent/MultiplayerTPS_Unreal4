@@ -14,6 +14,7 @@ struct FTeamScoring
 	FTeamScoring(const FColor& c)
 		: color(c) {};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<class ADeathRocket_ProtoCharacter*> players;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FColor color = FColor::Blue;
