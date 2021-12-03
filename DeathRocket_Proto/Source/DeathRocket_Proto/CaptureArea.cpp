@@ -6,7 +6,7 @@
 // Sets default values
 ACaptureArea::ACaptureArea()
 {
-	//PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 
 	areaCollider = CreateDefaultSubobject<UBoxComponent>("AreaCollider");
 	areaCollider->SetBoxExtent(FVector(800.f, 800.f, 800.f));
@@ -21,34 +21,34 @@ void ACaptureArea::BeginPlay()
 	areaCollider->OnComponentEndOverlap.AddDynamic(this, &ACaptureArea::OnOverlapEnd);
 }
 
-// Called every frame
 void ACaptureArea::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-}
-
-void ACaptureArea::TickCapturePercent(const FColor& team, float deltaPercent)
-{
-	if (captured)
+	if (captured || capturingTeams.Num() == 0)
 		return;
 
-	if (beforeContestTeam != FColor::Black)
-	{
-		previousCapturingTeam = beforeContestTeam;
-		beforeContestTeam = FColor::Black;
-	}
+	//if (beforeContestTeam != FColor::Black)
+	//{
+	//	previousCapturingTeam = beforeContestTeam;
+	//	beforeContestTeam = FColor::Black;
+	//}
 
-	// If capture reset, begin true capture
-	if (tickFactor == -1.f * resetAreaSpeed && (curPercent <= 0.f || team == previousCapturingTeam))
-		tickFactor = 1.f;
-	// If previous capturer gone, need to reset capture
-	else if (tickFactor == 1.f && team != previousCapturingTeam)
-		tickFactor = -1.f * resetAreaSpeed;
+	float captureDeltaTime = captureTime * DeltaTime;
 
-	curPercent += deltaPercent * tickFactor;
+	bool goodCapture = capturingTeams.Num() == 1 && capturingTeams[0] == previousCapturingTeam;
+	bool retakeCapture = capturingTeams.Num() == 1 && capturingTeams[0] != previousCapturingTeam;
+	bool resetCapture = !capturingTeams.Find(previousCapturingTeam);
 
-	if (tickFactor == 1.f)
-		previousCapturingTeam = team;
+	if (goodCapture)
+		curPercent += captureDeltaTime;
+	else if (retakeCapture || resetCapture)
+		curPercent -= captureDeltaTime * resetAreaSpeed;
+
+	curPercent = FMath::Max(curPercent, 0.f);
+
+	bool beginCapture = curPercent <= 0.f && capturingTeams.Num() == 1;
+
+	if (beginCapture)
+		previousCapturingTeam = capturingTeams[0];
 
 	OnCaptureProcess.Broadcast();
 
@@ -108,7 +108,7 @@ void ACaptureArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		// Notify the Actor that he entered in the area
 		captureComp->BeginOverlap();
 
-		capturingTeams.Add(captureComp->teamColor);
+		capturingTeams.AddUnique(captureComp->teamColor);
 	}
 }
 

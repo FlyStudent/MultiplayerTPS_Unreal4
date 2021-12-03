@@ -27,8 +27,9 @@ protected:
 	bool captured = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float curPercent;
+	UPROPERTY(BlueprintReadWrite)
+	float captureTime = 10.f;
 
-	float tickFactor = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float resetAreaSpeed = 2.f;
 
@@ -43,8 +44,6 @@ public:
 	ACaptureArea();
 
 	virtual void Tick(float DeltaTime) override;
-
-	void TickCapturePercent(const FColor& team, float deltaPercent);
 
 	bool TryCaptureArea(const FColor& team);
 	void ContestedColor();

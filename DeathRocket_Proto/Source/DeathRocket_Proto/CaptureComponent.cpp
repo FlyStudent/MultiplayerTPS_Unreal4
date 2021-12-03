@@ -62,9 +62,6 @@ void UCaptureComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 	if (isEntered)
 	{
-		// Look if the capture area is free
-		float deltaCaptureTime = (DeltaTime * 100.f) / captureTime;
-
 		bool allowCapture = currentArea->TryCaptureArea(teamColor);
 		// Capture the area if nobody else doing
 		if (!isCapturing && allowCapture)
@@ -72,12 +69,11 @@ void UCaptureComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 		else if (isCapturing && !allowCapture)
 			StopAreaCapture();
 		// Capture update
-		if (isCapturing && allowCapture)
-			currentArea->TickCapturePercent(teamColor, deltaCaptureTime);
+		//if (isCapturing && allowCapture)
+		//	currentArea->TickCapturePercent(teamColor, deltaCaptureTime);
 	}
 	else if (!AreaDetected())
 	{
-		// TODO : optimize
 		SearchArea();
 	}
 }

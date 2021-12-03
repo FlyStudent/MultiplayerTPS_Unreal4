@@ -30,9 +30,6 @@ protected:
 	bool isEntered = false;
 	bool isCapturing = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		float captureTime = 10.f;
-
 	int captureCount = 0;
 
 	UFUNCTION()

@@ -30,7 +30,7 @@ protected:
 
 public:	
 	UPROPERTY(EditAnywhere);
-	float selfDamageMultiplier = 0.5f;
+	float selfDamageMultiplier = 0.7f;
 
 	UPROPERTY(EditAnywhere);
 	float selfLaunchForceMultiplier = 5.f;
