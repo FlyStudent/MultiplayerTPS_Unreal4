@@ -58,6 +58,9 @@ void AMenuGameMode::StartPlay()
 void AMenuGameMode::SetPlayer(APlayerController* controller)
 {
 	int id = UGameplayStatics::GetPlayerControllerID(controller);
+	if (id < 0 || id >= playerConnected.Num())
+		return;
+
 	playerConnected[id] = true;
 	connectedCount++;
 

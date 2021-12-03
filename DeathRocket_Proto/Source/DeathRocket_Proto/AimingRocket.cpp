@@ -7,6 +7,7 @@
 #include "DeathRocket_ProtoCharacter.h"
 
 AAimingRocket::AAimingRocket()
+	:ARocket()
 {
 }
 
