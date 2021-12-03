@@ -7,10 +7,6 @@ Ultime::Ultime()
 	ultimeRocket = ERocketType::BIG;
 }
 
-Ultime::~Ultime()
-{
-}
-
 void Ultime::Use(ADeathRocket_ProtoCharacter* user)
 {
 	// Spawn GIGA ROCKET or CONTROLLED ROCKET

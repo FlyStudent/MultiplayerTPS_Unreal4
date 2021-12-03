@@ -87,6 +87,8 @@ ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
 	delete fireTimer;
 	delete reloadTimer;
 	delete gamepadUltimeTimer;
+	delete secondTripleBulletTimer;
+	delete thirdTripleBulletTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
