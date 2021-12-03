@@ -13,6 +13,7 @@ class ADeathRocket_ProtoGameMode : public AGameModeBase
 
 public:
 	ADeathRocket_ProtoGameMode();
+
 };
 
 
