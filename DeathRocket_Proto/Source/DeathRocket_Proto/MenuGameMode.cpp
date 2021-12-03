@@ -21,18 +21,24 @@ AMenuGameMode::AMenuGameMode()
 	teamList.Add(FColor::Purple);
 	teamList.Add(FColor::MakeRandomColor());
 
-	nicknameList.Add("Player 1");
-	nicknameList.Add("Player 2");
-	nicknameList.Add("Ironman");
-	nicknameList.Add("Chocolate");
-	nicknameList.Add("Winner");
-	nicknameList.Add("Loser");
-	nicknameList.Add("Fly64");
-	nicknameList.Add("Dr3auxis");
-	nicknameList.Add("Damien");
-	nicknameList.Add("Rémi");
+	AddNickname("Player 1");
+	AddNickname("Player 2");
+	AddNickname("Ironman");
+	AddNickname("Chocolate");
+	AddNickname("Winner");
+	AddNickname("Loser");
+	AddNickname("Fly64");
+	AddNickname("Dr3auxis");
+	AddNickname("Damien");
+	AddNickname("Rémi");
 
 	OnGoToSelection.AddDynamic(this, &AMenuGameMode::ResetSelectionMenu);
+}
+
+void AMenuGameMode::AddNickname(const FString& nickname)
+{
+	nicknameList.Add(nickname);
+	nicknameAccess.Add(true);
 }
 
 void AMenuGameMode::StartPlay()
@@ -102,4 +108,15 @@ void AMenuGameMode::PlayGame()
 	UGameplayStatics::SetForceDisableSplitscreen(GetWorld(), false);
 	UGameplayStatics::OpenLevel(GetWorld(), "ThirdPersonExampleMap");
 
+}
+
+bool AMenuGameMode::TryGetNickname(int index, FString& nickname)
+{
+	if (nicknameAccess[index])
+	{
+		nickname = nicknameList[index];
+		return true;
+	}
+
+	return false;
 }
