@@ -35,6 +35,8 @@ protected:
 	TArray<FColor> capturingTeams;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FColor previousCapturingTeam = FColor::Blue;
+	//FColor::Black = { 0.f, 0.f, 0.f }
+	FColor beforeContestTeam = FColor::Black;
 
 public:	
 
@@ -43,9 +45,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void TickCapturePercent(const FColor& team, float deltaPercent);
-	void UpdateColor();
 
 	bool TryCaptureArea(const FColor& team);
+	void ContestedColor();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
