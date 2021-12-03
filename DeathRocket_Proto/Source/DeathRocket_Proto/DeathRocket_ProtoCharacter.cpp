@@ -281,7 +281,7 @@ void ADeathRocket_ProtoCharacter::MoveRight(float Value)
 
 void ADeathRocket_ProtoCharacter::Fire()
 {
-	if (firing || curAmmo <= 0)
+	if (!healthComp->GetIsAlive() || firing || curAmmo <= 0)
 		return;
 
 	if (reloading)
@@ -415,7 +415,7 @@ bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bo
 
 void ADeathRocket_ProtoCharacter::Reload()
 {
-	if (curAmmo >= ammoMax || reloading)
+	if (!healthComp->GetIsAlive() || curAmmo >= ammoMax || reloading)
 		return;
 
 	StopAiming();
@@ -520,7 +520,7 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
-	if (reloading && curAmmo <= 0)
+	if (!healthComp->GetIsAlive() || (reloading && curAmmo <= 0))
 		return;
 
 	sprintComp->EndSprint();
@@ -548,6 +548,7 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
+
 	SetRagdollOn();
 	UpdateDeathDisplay();
 }

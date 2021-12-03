@@ -15,6 +15,8 @@ ARocket::ARocket()
     // Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
 
+    OnDestroyed.AddDynamic(this, &ARocket::Explode);
+
     // set projectil collider
     HeadComp = CreateDefaultSubobject<USphereComponent>(TEXT("HeadCollider"));
     HeadComp->BodyInstance.SetCollisionProfileName("BlockAll");
@@ -55,14 +57,8 @@ void ARocket::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
-void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void ARocket::Explode(AActor* self)
 {
-    if (!HitComponent || !OtherActor || OtherActor == this || !OtherComp)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Cannot find actors and components"));
-        return;
-    }
-
     FVector position = GetActorLocation();
 
     OnExplosion.Broadcast();
@@ -80,7 +76,7 @@ void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
         float distance = difference.Size();
         float oneOverDistance = 1.f / distance;
 
-        float power = distanceMultiplier  * oneOverDistance;
+        float power = distanceMultiplier * oneOverDistance;
 
         if (overlappedActor->Implements<UDamageableInterface>())
         {
@@ -103,7 +99,7 @@ void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
             if (physicComp->IsSimulatingPhysics())
                 physicComp->AddImpulseAtLocation(distanceImpulse, overlappedActorLocation);
         }
-        
+
         if (auto* character = Cast<ACharacter>(overlappedActor))
         {
             FVector distanceLaunch = direction * launchForce;
@@ -113,6 +109,15 @@ void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrim
 
             character->LaunchCharacter(distanceLaunch, true, true);
         }
+    }
+}
+
+void ARocket::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+    if (!HitComponent || !OtherActor || OtherActor == this || !OtherComp)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Cannot find actors and components"));
+        return;
     }
 
     Destroy();

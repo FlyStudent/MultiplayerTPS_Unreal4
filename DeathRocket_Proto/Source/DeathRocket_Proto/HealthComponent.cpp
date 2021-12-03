@@ -48,6 +48,8 @@ void UHealthComponent::Kill()
         return;
 
     isAlive = false;
+    SetLife(0);
+
     OnKill.Broadcast();
 }
 
@@ -58,6 +60,6 @@ void UHealthComponent::SetLife(int value)
     if (OnLifeChanged.IsBound())
         OnLifeChanged.Broadcast(life);
 
-    if (life <= 0)
+    if (isAlive && life <= 0)
         Kill();
 }

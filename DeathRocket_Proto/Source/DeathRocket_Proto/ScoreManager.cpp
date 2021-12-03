@@ -36,6 +36,7 @@ void AScoreManager::UpdateEveryTeams()
 {
 	for (FTeamScoring& team : teams)
 	{
+		team.kills = team.areas = team.total = 0;
 		for (auto player : team.players)
 		{
 			team.kills += player->GetKillsCount();

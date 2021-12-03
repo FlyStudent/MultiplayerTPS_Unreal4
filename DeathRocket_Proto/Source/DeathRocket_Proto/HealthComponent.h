@@ -48,6 +48,7 @@ public:
 
     int GetLife() { return life; }
     int GetMaxLife() { return maxLife; }
+    bool GetIsAlive() { return isAlive; }
 
     UFUNCTION(BlueprintCallable)
     float GetLifePercent() { return (float)life / (float)maxLife; }

@@ -59,6 +59,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	virtual void Explode(AActor* self);
+
 public:	
 	UPROPERTY(BlueprintAssignable, Category = "Components|Explosion")
 	FRocketDelegate OnExplosion;
