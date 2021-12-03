@@ -22,15 +22,21 @@ AMenuGameMode::AMenuGameMode()
 	teamList.Add(FColor::MakeRandomColor());
 
 	nicknameList.Add("Player 1");
+	nicknameList.Add("Story Mode");
 	nicknameList.Add("Player 2");
-	nicknameList.Add("Ironman");
-	nicknameList.Add("Chocolate");
 	nicknameList.Add("Winner");
 	nicknameList.Add("Loser");
-	nicknameList.Add("Fly64");
-	nicknameList.Add("Dr3auxis");
-	nicknameList.Add("Damien");
-	nicknameList.Add("Rémi");
+	nicknameList.Add("Floriqn");
+	nicknameList.Add("Dr3quxis");
+	nicknameList.Add("Jqrod");
+	nicknameList.Add("R?mi");
+	nicknameList.Add("LesPetitsProgrq;;eurs");
+	nicknameList.Add("Leon");
+	nicknameList.Add("Superwoman");
+	nicknameList.Add(" . ");
+	nicknameList.Add("=)");
+	nicknameList.Add(")=");
+	nicknameList.Add("Chocolate");
 
 	OnGoToSelection.AddDynamic(this, &AMenuGameMode::ResetSelectionMenu);
 }

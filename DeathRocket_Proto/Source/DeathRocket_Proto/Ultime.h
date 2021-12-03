@@ -4,7 +4,7 @@
 
 enum class ERocketType : uint8;
 
-class DEATHROCKET_PROTO_API Ultime
+class DEATHROCKET_PROTO_API Ultime final
 {
 protected:
 
@@ -16,5 +16,5 @@ public:
 	virtual void Use(class ADeathRocket_ProtoCharacter* user);
 
 	Ultime();
-	~Ultime();
+	~Ultime() = default;
 };
