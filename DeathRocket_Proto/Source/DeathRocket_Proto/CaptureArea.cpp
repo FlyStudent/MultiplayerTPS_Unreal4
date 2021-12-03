@@ -32,6 +32,12 @@ void ACaptureArea::TickCapturePercent(const FColor& team, float deltaPercent)
 	if (captured)
 		return;
 
+	if (beforeContestTeam != FColor::Black)
+	{
+		previousCapturingTeam = beforeContestTeam;
+		beforeContestTeam = FColor::Black;
+	}
+
 	// If capture reset, begin true capture
 	if (tickFactor == -1.f * resetAreaSpeed && (curPercent <= 0.f || team == previousCapturingTeam))
 		tickFactor = 1.f;
@@ -59,6 +65,27 @@ bool ACaptureArea::TryCaptureArea(const FColor& team)
 	}
 
 	return true;
+}
+
+void ACaptureArea::ContestedColor()
+{
+	beforeContestTeam = previousCapturingTeam;
+	uint8 r = 0.f, g = 0.f, b = 0.f;
+	uint8 nTeams = 0;	//number of teams
+
+	for (auto capturingTeam : capturingTeams)
+	{
+		r += capturingTeam.R;
+		g += capturingTeam.G;
+		b += capturingTeam.B;
+		++nTeams;
+	}
+
+	if (nTeams)
+	{
+		FColor blended = FColor(r / nTeams, g / nTeams, b / nTeams);
+		previousCapturingTeam = blended;
+	}
 }
 
 void ACaptureArea::AreaCaptured()
