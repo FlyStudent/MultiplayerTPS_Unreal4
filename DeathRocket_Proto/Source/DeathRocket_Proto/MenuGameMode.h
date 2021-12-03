@@ -26,6 +26,8 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void AddNickname(const FString& nickname);
 	UFUNCTION(BlueprintCallable)
+	void FreeNickname(int index);
+	UFUNCTION(BlueprintCallable)
 	bool TryGetNickname(int index, FString& nickname);
 
 	void StartPlay() override;

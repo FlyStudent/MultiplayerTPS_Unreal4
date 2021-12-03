@@ -110,11 +110,22 @@ void AMenuGameMode::PlayGame()
 
 }
 
+void AMenuGameMode::FreeNickname(int index)
+{
+	if (index >= 0 && index < nicknameAccess.Num())
+		nicknameAccess[index] = true;
+}
+
+
 bool AMenuGameMode::TryGetNickname(int index, FString& nickname)
 {
+	if (index < 0 && index >= nicknameAccess.Num())
+		return false;
+
 	if (nicknameAccess[index])
 	{
 		nickname = nicknameList[index];
+		nicknameAccess[index] = false;
 		return true;
 	}
 
