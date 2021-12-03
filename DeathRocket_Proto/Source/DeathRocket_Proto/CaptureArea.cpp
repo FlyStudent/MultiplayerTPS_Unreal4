@@ -81,11 +81,12 @@ void ACaptureArea::ContestedColor()
 		++nTeams;
 	}
 
-	if (nTeams)
+	/*if (nTeams)
 	{
 		FColor blended = FColor(r / nTeams, g / nTeams, b / nTeams);
 		previousCapturingTeam = blended;
-	}
+	}*/
+	previousCapturingTeam = FColor::Silver;
 }
 
 void ACaptureArea::AreaCaptured()

@@ -16,10 +16,10 @@ AMenuGameMode::AMenuGameMode()
 
 	teamList.Add(FColor::Blue);
 	teamList.Add(FColor::Red);
-	teamList.Add(FColor::Yellow);
+	teamList.Add(FColor::Orange);
 	teamList.Add(FColor::Green);
 	teamList.Add(FColor::Purple);
-	teamList.Add(FColor::Silver);
+	teamList.Add(FColor::MakeRandomColor());
 
 	nicknameList.Add("Player 1");
 	nicknameList.Add("Player 2");
