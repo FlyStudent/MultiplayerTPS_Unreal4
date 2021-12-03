@@ -21,24 +21,29 @@ AMenuGameMode::AMenuGameMode()
 	teamList.Add(FColor::Purple);
 	teamList.Add(FColor::MakeRandomColor());
 
-	nicknameList.Add("Player 1");
-	nicknameList.Add("Story Mode");
-	nicknameList.Add("Player 2");
-	nicknameList.Add("Winner");
-	nicknameList.Add("Loser");
-	nicknameList.Add("Floriqn");
-	nicknameList.Add("Dr3quxis");
-	nicknameList.Add("Jqrod");
-	nicknameList.Add("R?mi");
-	nicknameList.Add("LesPetitsProgrq;;eurs");
-	nicknameList.Add("Leon");
-	nicknameList.Add("Superwoman");
-	nicknameList.Add(" . ");
-	nicknameList.Add("=)");
-	nicknameList.Add(")=");
-	nicknameList.Add("Chocolate");
+	AddNickname("Player 1");
+	AddNickname("Story Mode");
+	AddNickname("Player 2");
+	AddNickname("Superwoman");
+	AddNickname("Chocolate");
+	AddNickname("Winner");
+	AddNickname("Loser");
+	AddNickname("Floriqn");
+	AddNickname("Dr3quxis");
+	AddNickname("Jqrod");
+	AddNickname("R?mi");
+	AddNickname("Leon");
+	AddNickname("LesPetitsProgrq;;eurs");
+	AddNickname("=)");
+	AddNickname("(=");
 
 	OnGoToSelection.AddDynamic(this, &AMenuGameMode::ResetSelectionMenu);
+}
+
+void AMenuGameMode::AddNickname(const FString& nickname)
+{
+	nicknameList.Add(nickname);
+	nicknameAccess.Add(true);
 }
 
 void AMenuGameMode::StartPlay()
@@ -111,4 +116,26 @@ void AMenuGameMode::PlayGame()
 	UGameplayStatics::SetForceDisableSplitscreen(GetWorld(), false);
 	UGameplayStatics::OpenLevel(GetWorld(), "ThirdPersonExampleMap");
 
+}
+
+void AMenuGameMode::FreeNickname(int index)
+{
+	if (index >= 0 && index < nicknameAccess.Num())
+		nicknameAccess[index] = true;
+}
+
+
+bool AMenuGameMode::TryGetNickname(int index, FString& nickname)
+{
+	if (index < 0 && index >= nicknameAccess.Num())
+		return false;
+
+	if (nicknameAccess[index])
+	{
+		nickname = nicknameList[index];
+		nicknameAccess[index] = false;
+		return true;
+	}
+
+	return false;
 }

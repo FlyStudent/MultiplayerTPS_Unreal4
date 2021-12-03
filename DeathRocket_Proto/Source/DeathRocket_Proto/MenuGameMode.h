@@ -20,6 +20,15 @@ private:
 	TArray<FColor> teamList;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TArray<FString> nicknameList;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	TArray<bool> nicknameAccess;
+
+	UFUNCTION(BlueprintCallable)
+	void AddNickname(const FString& nickname);
+	UFUNCTION(BlueprintCallable)
+	void FreeNickname(int index);
+	UFUNCTION(BlueprintCallable)
+	bool TryGetNickname(int index, FString& nickname);
 
 	void StartPlay() override;
 	void SpawnControllerAtPlayerStart(APlayerController* controller);
