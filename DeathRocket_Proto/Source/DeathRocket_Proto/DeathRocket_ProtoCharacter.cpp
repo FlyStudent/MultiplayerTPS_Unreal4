@@ -17,6 +17,7 @@
 #include "HealthComponent.h"
 #include "SprintComponent.h"
 #include "CaptureComponent.h"
+#include "PauseComponent.h"
 
 #include "Rocket.h"
 #include "Ultime.h"
@@ -69,6 +70,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	sprintComp = CreateDefaultSubobject<USprintComponent>(TEXT("SprintComponent"));
 	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
 	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("AreaCaptureComponent"));
+	pauseComp = CreateDefaultSubobject<UPauseComponent>(TEXT("PauseComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -157,14 +159,17 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("Ultime", IE_Pressed, ultimeComp, &UUltimeLoaderComponent::Use);
 	PlayerInputComponent->BindAction("Gamepad Ultime", IE_Pressed, this, &ADeathRocket_ProtoCharacter::GamepadUltimeInput);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Aim);
-	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
+	FInputActionBinding& aimToggle = PlayerInputComponent->BindAction("Aim", IE_Released, this, &ADeathRocket_ProtoCharacter::StopAiming);
+	aimToggle.bExecuteWhenPaused = true;
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Reload);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, sprintComp, &USprintComponent::Sprint);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
+	FInputActionBinding& sprintToggle = PlayerInputComponent->BindAction("Sprint", IE_Released, sprintComp, &USprintComponent::EndSprint);
+	sprintToggle.bExecuteWhenPaused = true;
 
 	PlayerInputComponent->BindAction("Scoreboard", IE_Pressed, this, &ADeathRocket_ProtoCharacter::Score);
-	PlayerInputComponent->BindAction("Scoreboard", IE_Released, this, &ADeathRocket_ProtoCharacter::EndScore);
+	FInputActionBinding& scoreToggle = PlayerInputComponent->BindAction("Scoreboard", IE_Released, this, &ADeathRocket_ProtoCharacter::EndScore);
+	scoreToggle.bExecuteWhenPaused = true;
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ADeathRocket_ProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ADeathRocket_ProtoCharacter::MoveRight);
@@ -176,6 +181,9 @@ void ADeathRocket_ProtoCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAxis("TurnRate", this, &ADeathRocket_ProtoCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &ADeathRocket_ProtoCharacter::LookUpAtRate);
+
+	FInputActionBinding& pauseToggle = PlayerInputComponent->BindAction("Pause", IE_Pressed, pauseComp, &UPauseComponent::Pause);
+	pauseToggle.bExecuteWhenPaused = true;
 }
 
 void ADeathRocket_ProtoCharacter::SetTeamColor(const FColor& teamColor)
