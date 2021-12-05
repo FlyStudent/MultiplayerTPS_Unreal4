@@ -35,3 +35,4 @@ float Timer::GetProgess() const
 	float elapsed = world->GetTimerManager().GetTimerElapsed(timer);
 	return elapsed / time;
 }
+

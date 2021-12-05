@@ -92,7 +92,6 @@ void UCaptureComponent::StopAreaCapture()
 	if (AreaDetected())
 	{
 		currentArea->OnCaptureCompleted.RemoveDynamic(this, &UCaptureComponent::AreaCapturedBySelf);
-		currentArea->ContestedColor();
 		isCapturing = false;
 	}
 }

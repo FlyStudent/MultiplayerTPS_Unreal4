@@ -426,6 +426,7 @@ void ADeathRocket_ProtoCharacter::Reload()
 	reloading = true;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed() / 2.f;
 
+	reloadTimer->SetTime(reloadTime / (curAmmo + 1));
 	reloadTimer->Reset(this, &ADeathRocket_ProtoCharacter::EndReload);
 }
 

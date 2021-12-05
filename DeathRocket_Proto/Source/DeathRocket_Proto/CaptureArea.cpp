@@ -21,29 +21,40 @@ void ACaptureArea::BeginPlay()
 	areaCollider->OnComponentEndOverlap.AddDynamic(this, &ACaptureArea::OnOverlapEnd);
 }
 
+void ACaptureArea::SetCaptureTime(float time)
+{
+	captureTime = 100.f / time;
+}
+
 void ACaptureArea::Tick(float DeltaTime)
 {
-	if (captured || capturingTeams.Num() == 0)
+	if (captured)
 		return;
-
-	//if (beforeContestTeam != FColor::Black)
-	//{
-	//	previousCapturingTeam = beforeContestTeam;
-	//	beforeContestTeam = FColor::Black;
-	//}
 
 	float captureDeltaTime = captureTime * DeltaTime;
 
 	bool goodCapture = capturingTeams.Num() == 1 && capturingTeams[0] == previousCapturingTeam;
-	bool retakeCapture = capturingTeams.Num() == 1 && capturingTeams[0] != previousCapturingTeam;
-	bool resetCapture = !capturingTeams.Find(previousCapturingTeam);
+	bool fastResetCapture = capturingTeams.Num() >= 1 && capturingTeams.Find(previousCapturingTeam) == INDEX_NONE;
+	bool resetCapture = capturingTeams.Num() == 0;
 
 	if (goodCapture)
 		curPercent += captureDeltaTime;
-	else if (retakeCapture || resetCapture)
+	else if (fastResetCapture)
 		curPercent -= captureDeltaTime * resetAreaSpeed;
+	else if (resetCapture)
+		curPercent -= captureDeltaTime / resetAreaSpeed;
 
 	curPercent = FMath::Max(curPercent, 0.f);
+
+	// RENDER COLOR
+	{
+		bool contest = capturingTeams.Num() > 1;
+
+		if (contest)
+			renderCapturingColor = FColor::Silver;
+		else
+			renderCapturingColor = previousCapturingTeam;
+	}
 
 	bool beginCapture = curPercent <= 0.f && capturingTeams.Num() == 1;
 
@@ -67,28 +78,6 @@ bool ACaptureArea::TryCaptureArea(const FColor& team)
 	return true;
 }
 
-void ACaptureArea::ContestedColor()
-{
-	beforeContestTeam = previousCapturingTeam;
-	uint8 r = 0.f, g = 0.f, b = 0.f;
-	uint8 nTeams = 0;	//number of teams
-
-	for (auto capturingTeam : capturingTeams)
-	{
-		r += capturingTeam.R;
-		g += capturingTeam.G;
-		b += capturingTeam.B;
-		++nTeams;
-	}
-
-	/*if (nTeams)
-	{
-		FColor blended = FColor(r / nTeams, g / nTeams, b / nTeams);
-		previousCapturingTeam = blended;
-	}*/
-	previousCapturingTeam = FColor::Silver;
-}
-
 void ACaptureArea::AreaCaptured()
 {
 	captured = true;
@@ -109,6 +98,7 @@ void ACaptureArea::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		captureComp->BeginOverlap();
 
 		capturingTeams.AddUnique(captureComp->teamColor);
+		insiderTeams.Add(captureComp->teamColor);
 	}
 }
 
@@ -122,7 +112,10 @@ void ACaptureArea::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor
 	if (captureComp)
 	{
 		// Notify the Actor that he exits the area
-		capturingTeams.RemoveSingle(captureComp->teamColor);
+		insiderTeams.RemoveSingle(captureComp->teamColor);
+		if (insiderTeams.Find(captureComp->teamColor) == INDEX_NONE)
+			capturingTeams.RemoveSingle(captureComp->teamColor);
+
 		captureComp->EndOverlap();
 	}
 }

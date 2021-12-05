@@ -81,7 +81,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float fireRate = 1.f;
 	UPROPERTY(EditAnywhere, Category = Weapon)
-	float reloadTime = 3.f;
+	float reloadTime = 2.f;
 	UPROPERTY(EditAnywhere, Category = Weapon)
 	float gamepadUltiInputTime = 0.1f;
 

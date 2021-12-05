@@ -27,17 +27,23 @@ protected:
 	bool captured = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float curPercent;
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadOnly)
 	float captureTime = 10.f;
+
+	UFUNCTION(BlueprintCallable)
+	void SetCaptureTime(float time);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float resetAreaSpeed = 2.f;
 
+	// List of each capturer's team
+	TArray<FColor> insiderTeams;
+	// List of each teams (can't be twice)
 	TArray<FColor> capturingTeams;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FColor previousCapturingTeam = FColor::Blue;
-	//FColor::Black = { 0.f, 0.f, 0.f }
-	FColor beforeContestTeam = FColor::Black;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FColor renderCapturingColor = FColor::Blue;
 
 public:	
 
@@ -46,7 +52,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	bool TryCaptureArea(const FColor& team);
-	void ContestedColor();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

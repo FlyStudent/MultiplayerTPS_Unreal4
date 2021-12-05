@@ -23,6 +23,7 @@ public:
 	void Reset(UserClass* obj, typename FTimerDelegate::TUObjectMethodDelegate< UserClass >::FMethodPtr InTimerMethod);
 
 	float GetProgess() const;
+	void SetTime(float t) { if (t > 0.f) time = t; };
 };
 
 template< class UserClass >
