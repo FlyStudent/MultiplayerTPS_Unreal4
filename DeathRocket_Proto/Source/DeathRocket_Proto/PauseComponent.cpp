@@ -57,7 +57,7 @@ void UPauseComponent::Pause()
 	}
 
 	//self has a different pause UI
-	OnPause.Broadcast();
+	OnSenderPause.Broadcast();
 
 	UGameplayStatics::SetGamePaused(GetWorld(), !GetWorld()->IsPaused());
 }

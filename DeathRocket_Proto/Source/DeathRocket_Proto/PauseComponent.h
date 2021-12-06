@@ -31,7 +31,11 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FPauseEvent OnPause;
+	// The sender has a different event
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FPauseEvent OnSenderPause;
 
+	UFUNCTION(BlueprintCallable)
 	void Pause();
 	UFUNCTION(BlueprintCallable)
 	bool IsGamePaused() const;
