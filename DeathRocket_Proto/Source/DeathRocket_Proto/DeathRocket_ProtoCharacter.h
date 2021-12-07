@@ -220,6 +220,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Capture, meta = (AllowPrivateAccess = "true"))
 	class UCaptureComponent* captureComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pause, meta = (AllowPrivateAccess = "true"))
+	class UPauseComponent* pauseComp;
+
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class AScoreManager* scoreManager;
 
