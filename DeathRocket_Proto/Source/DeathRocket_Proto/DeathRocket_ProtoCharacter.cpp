@@ -91,6 +91,7 @@ ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
 	delete gamepadUltimeTimer;
 	delete secondTripleBulletTimer;
 	delete thirdTripleBulletTimer;
+	delete lastDamagerTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
@@ -102,6 +103,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	gamepadUltimeTimer = new Timer(GetWorld(), gamepadUltiInputTime);
 	secondTripleBulletTimer = new Timer(GetWorld(), TripleBulletTime);
 	thirdTripleBulletTimer = new Timer(GetWorld(), TripleBulletTime * 2);
+	lastDamagerTimer = new Timer(GetWorld(), keepLastDamagerTime);
 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
@@ -111,6 +113,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	// Setting values
 	fov = FollowCamera->FieldOfView;
 	curFov = fov;
+	lastDamager = this;
 
 	if (healthComp)
 	{
@@ -573,7 +576,7 @@ void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 
 	if (lastDamager->killfeedManager)
 		lastDamager->killfeedManager->KillHappened(lastDamager->GetNickName(), lastDamager->team,
-																nickName, team);
+												   nickName, team);
 
 	if (lastDamager->team == team)
 	{
@@ -629,6 +632,7 @@ void ADeathRocket_ProtoCharacter::Respawn()
 	healthComp->Reset();
 	sprintComp->EndRecover();
 	EndReload();
+	resetLastDamager();
 
 	GetCharacterMovement()->StopMovementImmediately();
 
@@ -686,6 +690,12 @@ void ADeathRocket_ProtoCharacter::EndScore()
 	OnScoreHide.Broadcast();
 }
 
+void ADeathRocket_ProtoCharacter::resetLastDamager()
+{
+	lastDamager = this;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("no more damager"));
+}
+
 void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 {
 	if (ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(from))
@@ -695,6 +705,8 @@ void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 			dmg = damage / allyDmgReduction;
 
 		lastDamager = player;
+
+		lastDamagerTimer->Reset(this, &ADeathRocket_ProtoCharacter::resetLastDamager);
 		healthComp->Hurt(dmg);
 	}
 }

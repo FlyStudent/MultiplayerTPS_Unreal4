@@ -122,6 +122,13 @@ protected:
 	void SetTeamColor(const FColor& teamColor);
 
 	ADeathRocket_ProtoCharacter* lastDamager = nullptr;
+	//the reference to the last damager resets after a certain time
+	class Timer* lastDamagerTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Team)
+	float keepLastDamagerTime = 3.f;
+
+	void resetLastDamager();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Team)
 	int allyDmgReduction = 2;
 	int kills = 0, deaths = 0;
