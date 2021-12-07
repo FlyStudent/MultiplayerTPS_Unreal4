@@ -17,6 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FKillFeedEvent, FString, killerNam
 															  FColor, killerColor,
 															  FString, victimName,
 															  FColor, victimColor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStreakEvent, FString, streak);
 
 UENUM(BlueprintType)
 enum class ERocketType : uint8 {
@@ -127,11 +128,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Team)
 	float keepLastDamagerTime = 3.f;
 
-	void resetLastDamager();
+	void ResetLastDamager();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Team)
 	int allyDmgReduction = 2;
 	int kills = 0, deaths = 0;
+
+	void EarnKill();
+
+	//number of kills without dying
+	int streak = 0;
+	//number of kills in short amount of time (double kill, triple kill, ...)
+	class Timer* fastStreakTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Team)
+	float fastStreakTime = 4.f;
+	int fastStreak = 0;
+
+	UPROPERTY(BlueprintAssignable, Category = Event)
+	FStreakEvent OnStreakReached;
+
+	void ResetFastStreak();
 
 	void Fire();
 	void EndFire();

@@ -92,6 +92,7 @@ ADeathRocket_ProtoCharacter::~ADeathRocket_ProtoCharacter()
 	delete secondTripleBulletTimer;
 	delete thirdTripleBulletTimer;
 	delete lastDamagerTimer;
+	delete fastStreakTimer;
 }
 
 void ADeathRocket_ProtoCharacter::BeginPlay()
@@ -104,6 +105,7 @@ void ADeathRocket_ProtoCharacter::BeginPlay()
 	secondTripleBulletTimer = new Timer(GetWorld(), TripleBulletTime);
 	thirdTripleBulletTimer = new Timer(GetWorld(), TripleBulletTime * 2);
 	lastDamagerTimer = new Timer(GetWorld(), keepLastDamagerTime);
+	fastStreakTimer = new Timer(GetWorld(), fastStreakTime);
 
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
@@ -560,6 +562,44 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 	Aim();
 }
 
+void ADeathRocket_ProtoCharacter::EarnKill()
+{
+	++kills;
+	++streak;
+	++fastStreak;
+	fastStreakTimer->Reset(this, &ADeathRocket_ProtoCharacter::ResetFastStreak);
+
+	if (streak == 5)
+		OnStreakReached.Broadcast("KILLING SPREE");
+
+	if (fastStreak == 0)
+		return;
+
+	switch (fastStreak)
+	{
+	case 2:
+		OnStreakReached.Broadcast("DOUBLE KILL");
+		break;
+	case 3:
+		OnStreakReached.Broadcast("TRIPLE KILL");
+		break;
+	case 4:
+		OnStreakReached.Broadcast("QUADRIPLE KILL");
+		break;
+	case 5:
+		OnStreakReached.Broadcast("QUINTUPLE KILL");
+		break;
+	default:
+		break;
+	}
+
+	if (fastStreak > 5)
+	{
+		FString ks = FString::FromInt(fastStreak) + FString(" KILLS STREAK");
+		OnStreakReached.Broadcast(ks);
+	}
+}
+
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
 
@@ -586,7 +626,7 @@ void ADeathRocket_ProtoCharacter::UpdateDeathDisplay()
 
 	lastDamager->OnHitmarkerDisplay.Broadcast();
 
-	lastDamager->kills++;
+	lastDamager->EarnKill();
 	lastDamager->ultimeComp->IncreaseByKill();
 }
 
@@ -632,7 +672,11 @@ void ADeathRocket_ProtoCharacter::Respawn()
 	healthComp->Reset();
 	sprintComp->EndRecover();
 	EndReload();
-	resetLastDamager();
+	ResetLastDamager();
+
+	//streaks
+	streak = 0;
+	ResetFastStreak();
 
 	GetCharacterMovement()->StopMovementImmediately();
 
@@ -690,10 +734,14 @@ void ADeathRocket_ProtoCharacter::EndScore()
 	OnScoreHide.Broadcast();
 }
 
-void ADeathRocket_ProtoCharacter::resetLastDamager()
+void ADeathRocket_ProtoCharacter::ResetLastDamager()
 {
 	lastDamager = this;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("no more damager"));
+}
+
+void ADeathRocket_ProtoCharacter::ResetFastStreak()
+{
+	fastStreak = 0;
 }
 
 void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
@@ -706,7 +754,7 @@ void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
 
 		lastDamager = player;
 
-		lastDamagerTimer->Reset(this, &ADeathRocket_ProtoCharacter::resetLastDamager);
+		lastDamagerTimer->Reset(this, &ADeathRocket_ProtoCharacter::ResetLastDamager);
 		healthComp->Hurt(dmg);
 	}
 }
