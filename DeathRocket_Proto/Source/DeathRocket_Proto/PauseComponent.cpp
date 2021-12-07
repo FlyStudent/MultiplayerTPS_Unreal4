@@ -53,11 +53,11 @@ void UPauseComponent::Pause()
 	{
 		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
 
-		player->pauseComp->OnPause.Broadcast();
+		player->pauseComp->OnPause.Broadcast(false);
 	}
 
 	//self has a different pause UI
-	OnSenderPause.Broadcast();
+	OnPause.Broadcast(true);
 
 	UGameplayStatics::SetGamePaused(GetWorld(), !GetWorld()->IsPaused());
 }

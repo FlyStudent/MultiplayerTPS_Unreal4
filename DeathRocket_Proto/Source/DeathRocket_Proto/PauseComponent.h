@@ -4,7 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "PauseComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPauseEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPauseEvent, bool, isSender);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class DEATHROCKET_PROTO_API UPauseComponent : public UActorComponent
@@ -31,9 +31,6 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = Event)
 	FPauseEvent OnPause;
-	// The sender has a different event
-	UPROPERTY(BlueprintAssignable, Category = Event)
-	FPauseEvent OnSenderPause;
 
 	UFUNCTION(BlueprintCallable)
 	void Pause();
