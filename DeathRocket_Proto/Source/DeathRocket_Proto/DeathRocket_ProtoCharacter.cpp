@@ -18,6 +18,7 @@
 #include "SprintComponent.h"
 #include "CaptureComponent.h"
 #include "PauseComponent.h"
+#include "AimBotComponent.h"
 
 #include "Rocket.h"
 #include "Ultime.h"
@@ -71,6 +72,7 @@ ADeathRocket_ProtoCharacter::ADeathRocket_ProtoCharacter()
 	ultimeComp = CreateDefaultSubobject<UUltimeLoaderComponent>(TEXT("UltimeComponent"));
 	captureComp = CreateDefaultSubobject<UCaptureComponent>(TEXT("AreaCaptureComponent"));
 	pauseComp = CreateDefaultSubobject<UPauseComponent>(TEXT("PauseComponent"));
+	aimBotComp = CreateDefaultSubobject<UAimBotComponent>(TEXT("AimBotComponent"));
 	// Create Rocket Luncher
 	RocketLauncher = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("RocketLuncher"));
 	RocketLauncher->SetupAttachment(GetMesh(), "RightArm");
@@ -242,6 +244,14 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 		FollowCamera->SetRelativeLocation(newSide);
 
 		FollowCamera->FieldOfView = FMath::Lerp<float>(FollowCamera->FieldOfView, curFov, DeltaTime * 10.f);
+
+		if (aimBotComp->target)
+		{
+			FVector toTarget = aimBotComp->target->GetActorLocation() - GetActorLocation();
+			GetController()->SetControlRotation(UKismetMathLibrary::RInterpTo(GetControlRotation(),
+												toTarget.Rotation(),
+												GetWorld()->GetDeltaSeconds(), aimBotComp->aimBotStrengh));
+		}
 	}
 
 	// Reload
@@ -543,6 +553,10 @@ void ADeathRocket_ProtoCharacter::Aim()
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed() / 2.f;
 
 	curFov = ads;
+
+	//camera direction
+	FVector fw = GetControlRotation().RotateVector({ 1.f, 0.f, 0.f });
+	aimBotComp->Aim(fw, GetActorLocation());
 }
 
 void ADeathRocket_ProtoCharacter::StopAiming()
@@ -554,6 +568,8 @@ void ADeathRocket_ProtoCharacter::StopAiming()
 	curFov = curFov == ads ? fov : curFov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
 	aimForced = false;
+
+	aimBotComp->LoseTarget();
 }
 
 void ADeathRocket_ProtoCharacter::ForceAim()
@@ -564,6 +580,8 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 
 void ADeathRocket_ProtoCharacter::EarnKill()
 {
+	aimBotComp->LoseTarget();
+
 	++kills;
 	++streak;
 	++fastStreak;

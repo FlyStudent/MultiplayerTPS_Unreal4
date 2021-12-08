@@ -246,6 +246,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pause, meta = (AllowPrivateAccess = "true"))
 	class UPauseComponent* pauseComp;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	class UAimBotComponent* aimBotComp;
+
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class AScoreManager* scoreManager;
 
