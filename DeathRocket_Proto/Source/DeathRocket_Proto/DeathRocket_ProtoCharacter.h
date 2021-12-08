@@ -293,7 +293,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int  GetCaptureCount() const;
 
-	void OnDamage(AActor* from, int damage) override;
+	void OnDamage_Implementation(AActor* from, int damage);
 
 	class ASpawnManager* spawnManager;
 };

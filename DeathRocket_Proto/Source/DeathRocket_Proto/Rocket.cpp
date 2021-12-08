@@ -81,13 +81,13 @@ void ARocket::Explode(AActor* self)
         if (overlappedActor->Implements<UDamageableInterface>())
         {
             IDamageableInterface* Damageable = Cast<IDamageableInterface>(overlappedActor); // ReactingObject will be non-null if OriginalObject implements UReactToTriggerInterface.
-
+            
             int distanceDamage = power * (float)damage;
 
             if (overlappedActor == GetOwner())
                 distanceDamage *= selfDamageMultiplier;
 
-            Damageable->OnDamage(GetOwner(), distanceDamage);
+            Damageable->Execute_OnDamage(overlappedActor, GetOwner(), distanceDamage);
         }
 
         FVector direction = difference * oneOverDistance;

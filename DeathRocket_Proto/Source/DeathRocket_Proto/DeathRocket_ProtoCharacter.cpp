@@ -744,7 +744,7 @@ void ADeathRocket_ProtoCharacter::ResetFastStreak()
 	fastStreak = 0;
 }
 
-void ADeathRocket_ProtoCharacter::OnDamage(AActor* from, int damage)
+void ADeathRocket_ProtoCharacter::OnDamage_Implementation(AActor* from, int damage)
 {
 	if (ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(from))
 	{
