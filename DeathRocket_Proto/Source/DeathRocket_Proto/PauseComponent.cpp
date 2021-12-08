@@ -15,7 +15,7 @@ UPauseComponent::UPauseComponent()
 
 void UPauseComponent::PickEveryPlayers()
 {
-	// Get all player starts
+	// Get all players
 	TArray<AActor*> actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADeathRocket_ProtoCharacter::StaticClass(), actors);
 
