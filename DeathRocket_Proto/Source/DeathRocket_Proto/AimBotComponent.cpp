@@ -1,6 +1,8 @@
 #include "AimBotComponent.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+
 #include "DeathRocket_ProtoCharacter.h"
 #include "HealthComponent.h"
 
@@ -35,8 +37,8 @@ void UAimBotComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+	ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_WorldStatic));
 }
 
 // Called every frame
@@ -61,7 +63,23 @@ void UAimBotComponent::SelectTarget(const FVector& cameraDir, const FVector& aim
 		ADeathRocket_ProtoCharacter* enemy = Cast<ADeathRocket_ProtoCharacter>(actor);
 
 		if (!enemy->healthComp->GetIsAlive())
+		{
+			++iterationIndex;
 			continue;
+		}
+
+		FHitResult hitObject;
+		FVector offsetFromCaster = (enemy->GetActorLocation() - aimerPos).GetSafeNormal() * 50.f;
+		bool hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(),
+																   aimerPos + offsetFromCaster,
+																   enemy->GetActorLocation(),
+																   ObjectTypes, false, ActorsToIgnore,
+																   EDrawDebugTrace::None, hitObject, true, FColor::White, FColor::Red, 0.3f);
+		if (hitObject.Actor.Get() != actor)
+		{
+			++iterationIndex;
+			continue;
+		}
 
 		FVector dirToEnemy = enemy->GetActorLocation() - aimerPos;
 		dirToEnemy.Normalize();
@@ -79,7 +97,10 @@ void UAimBotComponent::SelectTarget(const FVector& cameraDir, const FVector& aim
 	}
 
 	if (smallestAngle <= minimumAccuracy)
+	{
 		target = enemies[targetIndex];
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, enemies[targetIndex]->GetName());
+	}
 	else
 		target = nullptr;
 }
@@ -97,6 +118,19 @@ void UAimBotComponent::CheckTarget(const FVector& cameraDir, const FVector& aime
 	ADeathRocket_ProtoCharacter* enemy = Cast<ADeathRocket_ProtoCharacter>(target);
 
 	if (!enemy->healthComp->GetIsAlive())
+	{
+		LoseTarget();
+		return;
+	}
+
+	FHitResult hitObject;
+	FVector offsetFromCaster = (enemy->GetActorLocation() - aimerPos).GetSafeNormal() * 50.f;
+	bool hit = UKismetSystemLibrary::LineTraceSingleForObjects(GetWorld(),
+															   aimerPos + offsetFromCaster,
+															   enemy->GetActorLocation(),
+															   ObjectTypes, false, ActorsToIgnore,
+															   EDrawDebugTrace::None, hitObject, true, FColor::White, FColor::Red, 0.3f);
+	if (hitObject.Actor.Get() != enemy)
 	{
 		LoseTarget();
 		return;

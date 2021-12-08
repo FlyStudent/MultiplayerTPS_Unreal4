@@ -12,6 +12,10 @@ class DEATHROCKET_PROTO_API UAimBotComponent : public UActorComponent
 private:
 	TArray<AActor*> enemies;
 
+	//used for raycast
+	TArray<AActor*> ActorsToIgnore;
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+
 	//pick every players of the map except self
 	void PickEveryEnemies();
 

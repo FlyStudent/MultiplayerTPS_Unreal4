@@ -247,7 +247,7 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 
 		if (aimBotComp->target)
 		{
-			FVector toTarget = aimBotComp->target->GetActorLocation() - GetActorLocation();
+			FVector toTarget = aimBotComp->target->GetActorLocation() - FollowCamera->GetComponentLocation();
 			GetController()->SetControlRotation(UKismetMathLibrary::RInterpTo(GetControlRotation(),
 												toTarget.Rotation(),
 												GetWorld()->GetDeltaSeconds(), aimBotComp->aimBotStrengh));
