@@ -251,6 +251,10 @@ void ADeathRocket_ProtoCharacter::Tick(float DeltaTime)
 			GetController()->SetControlRotation(UKismetMathLibrary::RInterpTo(GetControlRotation(),
 												toTarget.Rotation(),
 												GetWorld()->GetDeltaSeconds(), aimBotComp->aimBotStrengh));
+
+			//camera direction
+			FVector fw = GetControlRotation().RotateVector({ 1.f, 0.f, 0.f });
+			aimBotComp->CheckTarget(fw, GetActorLocation());
 		}
 	}
 
@@ -556,7 +560,7 @@ void ADeathRocket_ProtoCharacter::Aim()
 
 	//camera direction
 	FVector fw = GetControlRotation().RotateVector({ 1.f, 0.f, 0.f });
-	aimBotComp->Aim(fw, GetActorLocation());
+	aimBotComp->SelectTarget(fw, GetActorLocation());
 }
 
 void ADeathRocket_ProtoCharacter::StopAiming()
@@ -580,8 +584,6 @@ void ADeathRocket_ProtoCharacter::ForceAim()
 
 void ADeathRocket_ProtoCharacter::EarnKill()
 {
-	aimBotComp->LoseTarget();
-
 	++kills;
 	++streak;
 	++fastStreak;

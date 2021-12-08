@@ -47,7 +47,7 @@ void UAimBotComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-void UAimBotComponent::Aim(const FVector& cameraDir, const FVector& aimerPos)
+void UAimBotComponent::SelectTarget(const FVector& cameraDir, const FVector& aimerPos)
 {
 	if (enemies.Num() == 0)
 		PickEveryEnemies();
@@ -87,4 +87,29 @@ void UAimBotComponent::Aim(const FVector& cameraDir, const FVector& aimerPos)
 void UAimBotComponent::LoseTarget()
 {
 	target = nullptr;
+}
+
+void UAimBotComponent::CheckTarget(const FVector& cameraDir, const FVector& aimerPos)
+{
+	if (!target)
+		return;
+
+	ADeathRocket_ProtoCharacter* enemy = Cast<ADeathRocket_ProtoCharacter>(target);
+
+	if (!enemy->healthComp->GetIsAlive())
+	{
+		LoseTarget();
+		return;
+	}
+
+	FVector dirToEnemy = enemy->GetActorLocation() - aimerPos;
+	dirToEnemy.Normalize();
+
+	float cos = FVector::DotProduct(cameraDir.GetSafeNormal(), dirToEnemy);
+	float angle = acosf(cos);	//angle in rad
+
+	if (angle > minimumAccuracy)
+	{
+		LoseTarget();
+	}
 }

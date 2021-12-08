@@ -22,9 +22,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	//the closest enemy to the crosshair (processed with the maximumSight) will be targeted if
 	//it is close to the crosshair enough (a the minumumAccuracy angle)
-	float minimumAccuracy = 0.4f;
+	float minimumAccuracy = 0.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float aimBotStrengh = 10.f;
+	float aimBotStrengh = 4.f;
 
 	AActor* target = nullptr;
 
@@ -40,6 +40,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	//returns the closest target to the crosshair, or nullptr
-	void Aim(const FVector& cameraDir, const FVector& aimerPos);
+	void SelectTarget(const FVector& cameraDir, const FVector& aimerPos);
+	//resets target to nullptr
 	void LoseTarget();
+	//check if target is still in sight
+	void CheckTarget(const FVector& cameraDir, const FVector& aimerPos);
 };
