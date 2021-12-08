@@ -114,7 +114,7 @@ void AMenuGameMode::PlayGame()
 		UGameplayStatics::RemovePlayer(UGameplayStatics::GetPlayerController(GetWorld(), i), true);
 
 	UGameplayStatics::SetForceDisableSplitscreen(GetWorld(), false);
-	UGameplayStatics::OpenLevel(GetWorld(), "ThirdPersonExampleMap");
+	UGameplayStatics::OpenLevel(GetWorld(), "Hacienda");
 
 }
 
