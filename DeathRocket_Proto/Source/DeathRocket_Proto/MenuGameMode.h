@@ -56,6 +56,8 @@ public:
 	FGameModeDelegate OnGoToSelection;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FGameModeDelegate OnGoToMainMenu;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	FGameModeDelegate OnGoToModeSelection;
 	UPROPERTY(BlueprintAssignable)
 	FPlayerJoinDelegate OnPlayerJoin;
 };
