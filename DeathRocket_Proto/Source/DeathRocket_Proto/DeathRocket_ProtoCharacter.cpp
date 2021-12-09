@@ -329,7 +329,6 @@ void ADeathRocket_ProtoCharacter::Fire()
 	FRotator rotation = GetControlRotation();
 	SetActorRotation(FRotator(0.f, rotation.Yaw, 0.f));
 
-	FVector spawnLocation = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
 
 	FHitResult HitObject;
 	//FHitResult HitObject2;
@@ -346,6 +345,7 @@ void ADeathRocket_ProtoCharacter::Fire()
 		rocketClass = rocketClasses[ERocketType::BASIC];
 
 	//secondTripleBulletTimer->Reset();
+	FVector spawnLocation = RocketLauncher->GetSocketLocation(FName("RocketCanon"));
 	if (rocketClass != rocketClasses[ERocketType::TRIPLE])
 	{
 		if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
@@ -359,16 +359,20 @@ void ADeathRocket_ProtoCharacter::Fire()
 	}
 	else
 	{
-		
+		FVector spawnDistance = FollowCamera->GetForwardVector().RotateAngleAxis(-90.f, FVector::UpVector) * 50.f;
+		spawnLocation -= spawnDistance;
+		// triple spawn
 		for (int i = 0; i < 3; i++)
 		{
 			if (ARocket* rocket = GetWorld()->SpawnActor<ARocket>(rocketClass, spawnLocation, GetControlRotation(), spawnParams))
 			{
-				FVector RocketDir = Hit ? HitObject.Location - spawnLocation : camForward;
+				FVector RocketDir = camForward;
 
 				RocketDir.Normalize();
 
 				rocket->Initialize(RocketDir);
+
+				spawnLocation += spawnDistance;
 			}
 		}
 	}
