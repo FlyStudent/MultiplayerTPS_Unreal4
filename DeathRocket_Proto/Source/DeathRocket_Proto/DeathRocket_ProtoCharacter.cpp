@@ -415,7 +415,7 @@ void ADeathRocket_ProtoCharacter::ZoneCapturedFeed()
 bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool ultime)
 {
 	// Can't pick ammo when reloading
-	if (reloading)
+	if (reloading || curFov == ads)
 		return false;
 
 	// Ultime ammo ignore max ammo
@@ -459,7 +459,7 @@ void ADeathRocket_ProtoCharacter::Reload()
 
 void ADeathRocket_ProtoCharacter::EndReload()
 {
-	curAmmo = ammoMax;
+	curAmmo = ammoMax + specialAmmos.Num();
 
 	OnAmmoUpdate.Broadcast();
 
@@ -550,13 +550,15 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
-	if (!healthComp->GetIsAlive() || (reloading && curAmmo <= 0))
+	if (!healthComp->GetIsAlive() || (reloading && curAmmo <= 0) || curFov == ads)
 		return;
 
 	sprintComp->EndSprint();
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed() / 2.f;
 
 	curFov = ads;
+	horizontalSensitivity /= 2.25f;
+	verticalSensitivity /= 2.25f;
 
 	//camera direction
 	FVector fw = GetControlRotation().RotateVector({ 1.f, 0.f, 0.f });
@@ -565,12 +567,16 @@ void ADeathRocket_ProtoCharacter::Aim()
 
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
-	if (aimForced)
+	if (aimForced || curFov != ads)
 		return;
 
 	//is player running? if yes -> fov is runFov
-	curFov = curFov == ads ? fov : curFov;
+	curFov =  fov;
 	GetCharacterMovement()->MaxWalkSpeed = sprintComp->GetSpeed();
+
+	horizontalSensitivity *= 2.25f;
+	verticalSensitivity *= 2.25f;
+
 	aimForced = false;
 
 	aimBotComp->LoseTarget();
@@ -622,6 +628,7 @@ void ADeathRocket_ProtoCharacter::EarnKill()
 
 void ADeathRocket_ProtoCharacter::OnDeath()
 {
+	specialAmmos.Empty();
 
 	SetRagdollOn();
 	UpdateDeathDisplay();

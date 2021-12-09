@@ -44,6 +44,8 @@ public:
 	const TArray<AActor*>& GetEveryPlayers() const;
 	UFUNCTION(BlueprintCallable)
 	const TArray<FTeamScoring>& GetEveryTeams();
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE int GetTeamCount() const { return teams.Num(); }
 
 	void UpdateEveryTeams();
 

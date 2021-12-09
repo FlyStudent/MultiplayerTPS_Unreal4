@@ -99,7 +99,7 @@ void UAimBotComponent::SelectTarget(const FVector& cameraDir, const FVector& aim
 	if (smallestAngle <= minimumAccuracy)
 	{
 		target = enemies[targetIndex];
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, enemies[targetIndex]->GetName());
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, enemies[targetIndex]->GetName());
 	}
 	else
 		target = nullptr;

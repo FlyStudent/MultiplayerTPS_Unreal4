@@ -61,7 +61,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = Weapon)
 	TMap<ERocketType, TSubclassOf<class ARocket>> rocketClasses;
 
-	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	TArray<ERocketType> specialAmmos;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	uint8 maxSpecialAmmos = 1;
