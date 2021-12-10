@@ -86,6 +86,7 @@ public:
 
 	bool CanSprint() const;
 	bool CanDash() const;
+	bool ProcessingDash() const;
 	void Sprint();
 	void EndSprint();
 	void EndRecover();

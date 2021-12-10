@@ -96,6 +96,12 @@ bool USprintComponent::CanDash() const
 	return dashActivate && !dashRecovering;
 }
 
+bool USprintComponent::ProcessingDash() const
+{
+	return processingDash || state == ESprintState::DASH;
+}
+
+
 void USprintComponent::Sprint()
 {
 	if (!CanSprint())
@@ -175,7 +181,6 @@ void USprintComponent::GoToDash()
 	//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Yellow, FString("Dash"));
 	state = ESprintState::DASH;
 	OnDash.Broadcast();
-
 
 	curSprintTime = 0.f;
 	dashRecovering = true;

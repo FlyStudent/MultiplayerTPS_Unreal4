@@ -554,7 +554,11 @@ void ADeathRocket_ProtoCharacter::changeCamSide()
 
 void ADeathRocket_ProtoCharacter::Aim()
 {
-	if (!healthComp->GetIsAlive() || (reloading && curAmmo <= 0) || curFov == ads)
+	bool notAlive = !healthComp->GetIsAlive();
+	bool reload = reloading && curAmmo <= 0;
+	bool aiming = curFov == ads;
+	bool dashing = sprintComp->ProcessingDash();
+	if (notAlive || reload || aiming || dashing)
 		return;
 
 	sprintComp->EndSprint();
@@ -571,7 +575,8 @@ void ADeathRocket_ProtoCharacter::Aim()
 
 void ADeathRocket_ProtoCharacter::StopAiming()
 {
-	if (aimForced || curFov != ads)
+	bool dashing = sprintComp->ProcessingDash();
+	if (aimForced || curFov != ads || dashing)
 		return;
 
 	//is player running? if yes -> fov is runFov
