@@ -419,7 +419,7 @@ void ADeathRocket_ProtoCharacter::ZoneCapturedFeed()
 bool ADeathRocket_ProtoCharacter::AddAmmunitions(ERocketType type, int count, bool ultime)
 {
 	// Can't pick ammo when reloading
-	if (reloading || curFov == ads)
+	if (reloading || (!ultime && curFov == ads))
 		return false;
 
 	// Ultime ammo ignore max ammo
