@@ -9,27 +9,7 @@ AScoreManager::AScoreManager()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	// Get all player starts
-	TArray<AActor*> actors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADeathRocket_ProtoCharacter::StaticClass(), actors);
 
-	// Save them in memory
-	for (AActor* actor : actors)
-	{
-		players.Add(actor);
-
-		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
-		player->scoreManager = this;
-
-		if (int32 id = teamColors.Find(player->GetTeam()) != INDEX_NONE)
-			teams[id-1].players.Add(player);
-		else
-		{
-			id = teams.Add(FTeamScoring(player->GetTeam()));
-			teams[id].players.Add(player);
-			teamColors.Add(player->GetTeam());
-		}
-	}
 }
 
 void AScoreManager::UpdateEveryTeams()
@@ -62,4 +42,27 @@ const TArray<FTeamScoring>& AScoreManager::GetEveryTeams()
 void AScoreManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Get all player starts
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADeathRocket_ProtoCharacter::StaticClass(), actors);
+
+	// Save them in memory
+	for (AActor* actor : actors)
+	{
+		players.Add(actor);
+
+		ADeathRocket_ProtoCharacter* player = Cast<ADeathRocket_ProtoCharacter>(actor);
+		player->scoreManager = this;
+
+		int32 id = teamColors.Find(player->GetTeam());
+		if (id != INDEX_NONE)
+			teams[id].players.Add(player);
+		else
+		{
+			id = teams.Add(FTeamScoring(player->GetTeam()));
+			teams[id].players.Add(player);
+			teamColors.Add(player->GetTeam());
+		}
+	}
 }
