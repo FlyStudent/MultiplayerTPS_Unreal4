@@ -5,3 +5,5 @@ DeathRocket_Proto/Saved
 DeathRocket_Proto/[Bb]uild
 *.sln
 *.orig
+DeathRocket_Proto/Content/Intermediate
+DeathRocket_Proto/Content/Saved
